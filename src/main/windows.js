@@ -28,7 +28,7 @@ function createLoginWindow() {
   return loginWindow;
 }
 
-function createMainWindow(store, setupScheduler) {
+function createMainWindow(store, setupScheduler, Notification) {
   const credentials = store.get('credentials');
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -100,7 +100,7 @@ function createMainWindow(store, setupScheduler) {
       `);
     }
     // Передаем webContents от BrowserView в планировщик
-    setupScheduler(view.webContents, store);
+    setupScheduler(view.webContents, store, Notification);
   });
 
   mainWindow.on('closed', () => {

@@ -42,7 +42,7 @@ async function getButtonState(webContents) {
       ${waitForElementScript}
       (async function() {
         try {
-          const button = await waitForElement('#startEndWorkButton', 5000); // Короткий таймаут для проверки состояния
+          const button = await waitForElement('#startEndWorkButton', 10000); // Короткий таймаут для проверки состояния
           console.log('getButtonState (внутри рендерера): Кнопка найдена, текст:', button.innerText);
           return button.innerText;
         } catch (e) {
@@ -58,8 +58,8 @@ async function getButtonState(webContents) {
   }
 }
 
-async function clickStartEndButton(webContents, store) {
-    if (!webContents || webContents.isDestroyed()) { 
+async function clickStartEndButton(webContents, store, Notification) {
+    if (!webContents || webContents.isDestroyed()) {
         console.log('clickStartEndButton: webContents не доступен или уничтожен. Клик отменен.');
         return;
     }
@@ -88,11 +88,11 @@ async function clickStartEndButton(webContents, store) {
         console.log('clickStartEndButton (результат):', result);
 
         if (result === 'Кнопка успешно нажата') {
-            console.log('clickStartEndButton: Кнопка нажата, ожидание 5 секунд для обновления страницы...');
+            console.log('clickStartEndButton: Кнопка нажата, ожидание 10 секунд для обновления страницы...');
             setTimeout(() => {
                 console.log('clickStartEndButton: Перезапуск планировщика после клика...');
-                setupScheduler(webContents, store);
-            }, 5000); 
+                setupScheduler(webContents, store, Notification);
+            }, 5000);
         } else if (result.startsWith('Ошибка:')) {
             console.warn('clickStartEndButton: Клик не выполнен из-за ошибки в рендерере:', result);
         } else {
@@ -103,7 +103,7 @@ async function clickStartEndButton(webContents, store) {
     }
 }
 
-async function setupScheduler(webContents, store) {
+async function setupScheduler(webContents, store, Notification) {
   clearAllTimeouts(); // Всегда очищаем старые таймеры перед новой настройкой
   
   const settings = store.get('settings') || {};
@@ -128,20 +128,71 @@ async function setupScheduler(webContents, store) {
     const startTime = new Date(now);
     startTime.setHours(startHour, startMinute, 0, 0);
 
-    if (now < startTime) {
+    const nowTime = now.getHours() * 60 + now.getMinutes();
+    const startTimeInMinutes = startHour * 60 + startMinute;
+
+    if (nowTime < startTimeInMinutes) {
       const startDelay = startTime.getTime() - now.getTime();
       console.log(`Клик "Начать" запланирован в ${startTime.toLocaleTimeString()} (через ${Math.round(startDelay / 1000)} сек)`);
       const startTimeout = setTimeout(async () => {
         console.log(`[Событие] Время начала (${startTime.toLocaleTimeString()}). Проверяем кнопку...`);
         const buttonState = await getButtonState(webContents);
         if (buttonState && buttonState.includes('Начать')) {
-            clickStartEndButton(webContents, store);
+            clickStartEndButton(webContents, store, Notification);
+            if (Notification && Notification.isSupported()) {
+              console.log('[Уведомление] Нативные уведомления поддерживаются. Попытка отправить уведомление о начале дня.');
+              const notification = new Notification({
+                title: 'Wplan Auto',
+                body: 'Рабочий день начался!',
+                silent: false
+              });
+              notification.show();
+              notification.on('show', () => console.log('[Уведомление] Уведомление "Рабочий день начался!" показано.'));
+              notification.on('click', () => console.log('[Уведомление] Уведомление "Рабочий день начался!" кликнуто.'));
+              notification.on('close', () => console.log('[Уведомление] Уведомление "Рабочий день начался!" закрыто.'));
+              notification.on('failed', (event, error) => console.error('[Увеведомление] Ошибка при отображении уведомления о начале дня:', error));
+            } else if (Notification) {
+              console.warn('[Уведомление] Нативные уведомления не поддерживаются в текущей среде для начала дня.');
+            } else {
+              console.warn('[Уведомление] Объект Notification не доступен для начала дня.');
+            }
         } else {
             console.log('[Событие] Кнопка "Начать" не найдена или день уже начат. Клик отменен.');
         }
       }, startDelay);
       schedulerTimeouts.push(startTimeout);
-    } else {
+    } else if (nowTime === startTimeInMinutes && now.getSeconds() < 5) { // Добавляем допущение на несколько секунд после наступления минуты
+      const startDelay = 5000 - now.getMilliseconds(); // Запускаем через несколько секунд, чтобы избежать повторного срабатывания
+      console.log(`Клик "Начать" запланирован в ${startTime.toLocaleTimeString()} (через ${Math.round(startDelay / 1000)} сек, с учетом секунд)`);
+      const startTimeout = setTimeout(async () => {
+        console.log(`[Событие] Время начала (${startTime.toLocaleTimeString()}). Проверяем кнопку...`);
+        const buttonState = await getButtonState(webContents);
+        if (buttonState && buttonState.includes('Начать')) {
+            clickStartEndButton(webContents, store, Notification);
+            if (Notification && Notification.isSupported()) {
+              console.log('[Уведомление] Нативные уведомления поддерживаются. Попытка отправить уведомление о начале дня.');
+              const notification = new Notification({
+                title: 'Wplan Auto',
+                body: 'Рабочий день начался!',
+                silent: false
+              });
+              notification.show();
+              notification.on('show', () => console.log('[Уведомление] Уведомление "Рабочий день начался!" показано.'));
+              notification.on('click', () => console.log('[Уведомление] Уведомление "Рабочий день начался!" кликнуто.'));
+              notification.on('close', () => console.log('[Уведомление] Уведомление "Рабочий день начался!" закрыто.'));
+              notification.on('failed', (event, error) => console.error('[Увеведомление] Ошибка при отображении уведомления о начале дня:', error));
+            } else if (Notification) {
+              console.warn('[Уведомление] Нативные уведомления не поддерживаются в текущей среде для начала дня.');
+            } else {
+              console.warn('[Уведомление] Объект Notification не доступен для начала дня.');
+            }
+        } else {
+            console.log('[Событие] Кнопка "Начать" не найдена или день уже начат. Клик отменен.');
+        }
+      }, startDelay);
+      schedulerTimeouts.push(startTimeout);
+    }
+    else {
       console.log(`Время начала (${startTime.toLocaleTimeString()}) уже прошло. Клик "Начать" не будет запланирован.`);
     }
   } else {
@@ -153,20 +204,71 @@ async function setupScheduler(webContents, store) {
     const endTime = new Date(now);
     endTime.setHours(endHour, endMinute, 0, 0);
 
-    if (now < endTime) {
+    const nowTime = now.getHours() * 60 + now.getMinutes();
+    const endTimeInMinutes = endHour * 60 + endMinute;
+
+    if (nowTime < endTimeInMinutes) {
       const endDelay = endTime.getTime() - now.getTime();
       console.log(`Клик "Завершить" запланирован в ${endTime.toLocaleTimeString()} (через ${Math.round(endDelay / 1000)} сек)`);
       const endTimeout = setTimeout(async () => {
         console.log(`[Событие] Время окончания (${endTime.toLocaleTimeString()}). Проверяем кнопку...`);
         const buttonState = await getButtonState(webContents);
         if (buttonState && buttonState.includes('Завершить')) {
-            clickStartEndButton(webContents, store);
+            clickStartEndButton(webContents, store, Notification);
+            if (Notification && Notification.isSupported()) {
+              console.log('[Уведомление] Нативные уведомления поддерживаются. Попытка отправить уведомление.');
+              const notification = new Notification({
+                title: 'Wplan Auto',
+                body: 'Рабочий день завершен!',
+                silent: false
+              });
+              notification.show();
+              notification.on('show', () => console.log('[Уведомление] Уведомление "Рабочий день завершен!" показано.'));
+              notification.on('click', () => console.log('[Уведомление] Уведомление "Рабочий день завершен!" кликнуто.'));
+              notification.on('close', () => console.log('[Уведомление] Уведомление "Рабочий день завершен!" закрыто.'));
+              notification.on('failed', (event, error) => console.error('[Уведомление] Ошибка при отображении уведомления:', error));
+            } else if (Notification) {
+              console.warn('[Уведомление] Нативные уведомления не поддерживаются в текущей среде.');
+            } else {
+              console.warn('[Уведомление] Объект Notification не доступен.');
+            }
         } else {
             console.log('[Событие] Кнопка "Завершить" не найдена или день еще не начат. Клик отменен.');
         }
       }, endDelay);
       schedulerTimeouts.push(endTimeout);
-    } else {
+    } else if (nowTime === endTimeInMinutes && now.getSeconds() < 5) { // Добавляем допущение на несколько секунд после наступления минуты
+      const endDelay = 5000 - now.getMilliseconds(); // Запускаем через несколько секунд, чтобы избежать повторного срабатывания
+      console.log(`Клик "Завершить" запланирован в ${endTime.toLocaleTimeString()} (через ${Math.round(endDelay / 1000)} сек, с учетом секунд)`);
+      const endTimeout = setTimeout(async () => {
+        console.log(`[Событие] Время окончания (${endTime.toLocaleTimeString()}). Проверяем кнопку...`);
+        const buttonState = await getButtonState(webContents);
+        if (buttonState && buttonState.includes('Завершить')) {
+            clickStartEndButton(webContents, store, Notification);
+            if (Notification && Notification.isSupported()) {
+              console.log('[Уведомление] Нативные уведомления поддерживаются. Попытка отправить уведомление.');
+              const notification = new Notification({
+                title: 'Wplan Auto',
+                body: 'Рабочий день завершен!',
+                silent: false
+              });
+              notification.show();
+              notification.on('show', () => console.log('[Уведомление] Уведомление "Рабочий день завершен!" показано.'));
+              notification.on('click', () => console.log('[Уведомление] Уведомление "Рабочий день завершен!" кликнуто.'));
+              notification.on('close', () => console.log('[Уведомление] Уведомление "Рабочий день завершен!" закрыто.'));
+              notification.on('failed', (event, error) => console.error('[Уведомление] Ошибка при отображении уведомления:', error));
+            } else if (Notification) {
+              console.warn('[Уведомление] Нативные уведомления не поддерживаются в текущей среде.');
+            } else {
+              console.warn('[Уведомление] Объект Notification не доступен.');
+            }
+        } else {
+            console.log('[Событие] Кнопка "Завершить" не найдена или день еще не начат. Клик отменен.');
+        }
+      }, endDelay);
+      schedulerTimeouts.push(endTimeout);
+    }
+    else {
       console.log(`Время окончания (${endTime.toLocaleTimeString()}) уже прошло. Клик "Завершить" не будет запланирован.`);
     }
   } else {

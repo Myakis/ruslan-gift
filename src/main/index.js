@@ -1,4 +1,4 @@
-const { app, BrowserWindow, nativeImage } = require('electron');
+const { app, BrowserWindow, nativeImage, Notification } = require('electron');
 const path = require('path');
 const Store = require('electron-store').default;
 const { createLoginWindow, createMainWindow } = require('./windows');
@@ -11,7 +11,7 @@ if (require('electron-squirrel-startup')) {
 
 const store = new Store({ projectName: 'wplan-auto' });
 
-initializeIpcHandlers(store);
+initializeIpcHandlers(store, Notification);
 
 app.whenReady().then(() => {
   if (process.platform === 'darwin') {
@@ -22,7 +22,7 @@ app.whenReady().then(() => {
   const credentials = store.get('credentials');
   if (credentials && credentials.username && credentials.password) {
     console.log('Найдены сохраненные учетные данные. Попытка авто-входа...');
-    createMainWindow(store, setupScheduler);
+    createMainWindow(store, setupScheduler, Notification);
   } else {
     createLoginWindow();
   }
@@ -30,7 +30,7 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       if (store.get('credentials')) {
-        createMainWindow(store, setupScheduler);
+        createMainWindow(store, setupScheduler, Notification);
       } else {
         createLoginWindow();
       }

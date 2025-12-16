@@ -2,14 +2,14 @@ const { ipcMain } = require('electron');
 const { createMainWindow, getMainWindow, getLoginWindow, createLoginWindow, createSettingsWindow, getSettingsWindow } = require('./windows');
 const { setupScheduler, getButtonState } = require('./scheduler');
 
-function initializeIpcHandlers(store) {
+function initializeIpcHandlers(store, Notification) {
   ipcMain.handle('login-data', async (event, credentials) => {
     console.log('Получены данные для входа:', credentials);
     const isAuthenticated = true; // Заглушка
 
     if (isAuthenticated) {
       store.set('credentials', credentials);
-      const mainWindow = createMainWindow(store, setupScheduler);
+      const mainWindow = createMainWindow(store, setupScheduler, Notification); // Передаем Notification
       const loginWindow = getLoginWindow();
       if (loginWindow) {
         loginWindow.close();
@@ -38,7 +38,7 @@ function initializeIpcHandlers(store) {
     const view = mainWindow ? mainWindow.getBrowserView() : null;
     if (view) {
       console.log('Настройки сохранены. Перезапускаем планировщик...');
-      setupScheduler(view.webContents, store);
+      setupScheduler(view.webContents, store, Notification); // Передаем Notification
     }
 
     const settingsWindow = getSettingsWindow();
