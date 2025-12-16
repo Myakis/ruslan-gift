@@ -99,6 +99,12 @@
             </label>
         </div>
         <div class="form-group">
+            <label>
+                <input type="checkbox" id="notifications-enabled">
+                Уведомления о начале/окончании
+            </label>
+        </div>
+        <div class="form-group">
             <label>Время начала (если вкл.)</label>
             <div class="time-input-group">
                 <input type="number" id="start-hour" min="0" max="23" placeholder="ЧЧ">
@@ -121,6 +127,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const autoStartCheckbox = document.getElementById('auto-start-enabled');
+            const notificationsCheckbox = document.getElementById('notifications-enabled');
             const startHourInput = document.getElementById('start-hour');
             const startMinuteInput = document.getElementById('start-minute');
             const endHourInput = document.getElementById('end-hour');
@@ -135,6 +142,7 @@
                 endHourInput.value = settings.endHour ?? 18;
                 endMinuteInput.value = (settings.endMinute ?? 0).toString().padStart(2, '0');
                 autoStartCheckbox.checked = settings.autoStartEnabled ?? true;
+                notificationsCheckbox.checked = settings.notificationsEnabled ?? true;
             });
 
             saveBtn.addEventListener('click', () => {
@@ -143,7 +151,8 @@
                     startMinute: parseInt(startMinuteInput.value, 10),
                     endHour: parseInt(endHourInput.value, 10),
                     endMinute: parseInt(endMinuteInput.value, 10),
-                    autoStartEnabled: autoStartCheckbox.checked
+                    autoStartEnabled: autoStartCheckbox.checked,
+                    notificationsEnabled: notificationsCheckbox.checked
                 };
                 window.electronAPI.saveSettings(settings);
                 statusEl.textContent = 'Сохранено!';
