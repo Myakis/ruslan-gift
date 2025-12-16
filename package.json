@@ -1,6 +1,6 @@
 {
   "name": "wplan-auto-forge",
-  "productName": "Wplan Auto",
+  "productName": "wplan-auto-forge",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": "src/main/index.js",

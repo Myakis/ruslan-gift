@@ -4,7 +4,8 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: './src/assets/images/logo-wplan.icns' // Иконка для .app
+    icon: './src/assets/images/logo-wplan.icns', // Иконка для .app
+    executableName: 'wplan-auto-forge'
   },
   rebuildConfig: {},
   makers: [
