@@ -10,7 +10,9 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        icon: './src/assets/images/logo-wplan.icns',
+      },
     },
     {
       name: '@electron-forge/maker-zip',
