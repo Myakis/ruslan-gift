@@ -5,7 +5,7 @@ module.exports = {
   packagerConfig: {
     asar: true,
     icon: './src/assets/images/logo-wplan.icns', // Иконка для .app
-    executableName: 'Wplan Auto'
+    executableName: 'Wplan-Auto'
   },
   rebuildConfig: {},
   makers: [
