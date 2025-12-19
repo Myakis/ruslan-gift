@@ -119,7 +119,7 @@ function getLoginWindow() { return loginWindow; }
 function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     width: 500,
-    height: 420,
+    height: 500,
     title: 'Настройки',
     webPreferences: {
       preload: path.join(__dirname, '../preload/settingsPreload.js'),
