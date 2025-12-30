@@ -1,117 +1,122 @@
 <!DOCTYPE html>
-<html>
-
+<html class="dark" lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Wplan Auto</title>
-    <style>
-        :root {
-            --bg-color: #f2f2f7;
-            --border-color: #d1d1d6;
-            --button-bg-color: rgb(0, 76, 255);
-            --button-hover-bg-color: rgb(0, 50, 200);
-            --text-color: black;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: rgb(33, 44, 66);
-                --border-color: #38383a;
-                --button-bg-color: rgb(0, 76, 255);
-                --button-hover-bg-color: rgb(0, 50, 200);
-                --text-color: white;
-            }
-        }
-
-        body,
-        html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            height: 100%;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        #menu-bar {
-            padding: 5px;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            gap: 5px;
-            flex-shrink: 0;
-            justify-content: flex-end;
-        }
-
-        button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: var(--button-bg-color);
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        button:hover {
-            background-color: var(--button-hover-bg-color);
-        }
-
-        .icon {
-            width: 14px;
-            height: 14px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        #content-view {
-            flex-grow: 1;
-            background-color: var(--bg-color);
-            /* Фон на случай, если view не загрузится */
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Главный экран Wplan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#067bf9",
+            "background-light": "#f5f7f8",
+            "background-dark": "#0f1923",
+            "surface-dark": "#1e2732",
+            "border-dark": "#2a3645",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "1rem",
+            "xl": "1.5rem",
+            "full": "9999px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    .app-window {
+      width: 1200px;
+      height: 800px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #4b5563;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: #6b7280;
+    }
+  </style>
 </head>
-
-<body>
-    <div id="menu-bar">
-        <button id="settings-btn">Настройки</button>
-        <button id="reload-btn">
-            Обновить страницу
+<body class="flex items-center justify-center min-h-screen bg-gray-900 font-display">
+  <div class="app-window flex flex-col bg-background-light dark:bg-background-dark rounded-xl border border-border-dark relative">
+    <header class="h-[50px] shrink-0 flex items-center justify-between px-4 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-border-dark select-none z-20 shadow-sm" id="menu-bar">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center size-8 bg-primary/10 rounded-lg">
+          <span class="material-symbols-outlined text-primary" style="font-size: 20px;">dataset</span>
+        </div>
+        <h1 class="text-gray-900 dark:text-white font-bold text-lg tracking-tight">Wplan</h1>
+        <div class="ml-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
+          <div class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Онлайн</span>
+        </div>
+      </div>
+      <div class="flex-1 h-full mx-4" style="-webkit-app-region: drag;"></div>
+      <div class="flex items-center gap-2">
+        <button class="group flex items-center justify-center size-8 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary/20 hover:text-primary transition-all duration-200" id="settings-btn" title="Настройки">
+          <span class="material-symbols-outlined group-hover:rotate-90 transition-transform duration-300" style="font-size: 20px;">settings</span>
         </button>
-        <button id="logout-btn">Выход</button>
-    </div>
-    <div id="content-view"></div>
+        <button class="group flex items-center justify-center size-8 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary/20 hover:text-primary transition-all duration-200" id="reload-btn" title="Обновить">
+          <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500" style="font-size: 20px;">refresh</span>
+        </button>
+        <div class="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1"></div>
+        <button class="flex items-center justify-center gap-2 h-8 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200" id="logout-btn" title="Выход">
+          <span class="text-xs font-semibold">Выход</span>
+          <span class="material-symbols-outlined" style="font-size: 18px;">logout</span>
+        </button>
+      </div>
+    </header>
+  </div>
 
-    <script>
-        document.getElementById('settings-btn').addEventListener('click', () => {
-            window.electronAPI.openSettings();
-        });
-        document.getElementById('reload-btn').addEventListener('click', () => {
-            window.electronAPI.reloadWplan();
-        });
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            window.electronAPI.logout();
-        });
+  <style>
+    @keyframes loading {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(400%);
+      }
+    }
+  </style>
 
-        // Apply theme based on system preference
-        const applySystemTheme = () => {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        };
+  <script>
+    document.getElementById('settings-btn').addEventListener('click', () => {
+      window.electronAPI.openSettings();
+    });
+    document.getElementById('reload-btn').addEventListener('click', () => {
+      window.electronAPI.reloadWplan();
+    });
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      window.electronAPI.logout();
+    });
 
-        applySystemTheme();
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
-    </script>
+    const applySystemTheme = () => {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    applySystemTheme();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
+  </script>
 </body>
-
 </html>

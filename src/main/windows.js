@@ -5,12 +5,14 @@ let mainWindow;
 let loginWindow;
 let settingsWindow;
 
-const MENU_BAR_HEIGHT = 40; // Высота меню-бара
+const MENU_BAR_HEIGHT = 50; // Высота меню-бара
 
 function createLoginWindow() {
   loginWindow = new BrowserWindow({
     width: 400,
     height: 600,
+    resizable: false,
+    maximizable: false,
     icon: path.join(__dirname, '../assets/images/logo-wplan.icns'),
     webPreferences: {
       preload: path.join(__dirname, '../preload/loginPreload.js'),
@@ -119,8 +121,10 @@ function getLoginWindow() { return loginWindow; }
 function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     width: 500,
-    height: 500,
+    height: 600,
     title: 'Настройки',
+    resizable: false,
+    maximizable: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/settingsPreload.js'),
     },

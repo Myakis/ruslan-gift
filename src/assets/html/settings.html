@@ -1,270 +1,356 @@
 <!DOCTYPE html>
-<html>
+<html class="dark" lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Настройки</title>
-    <style>
-        :root {
-            --bg-color: #f2f2f7;
-            --text-color: #1c1c1e;
-            --container-bg-color: #fff;
-            --border-color: #c7c7cc;
-            --button-bg-color: #007aff;
-            --button-hover-bg-color: #005bb5;
-            --h1-color: #1c1c1e;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: rgb(33, 44, 66);
-                --text-color: #f2f2f7;
-                --container-bg-color: rgb(52, 64, 90);
-                --border-color: #636366;
-                --button-bg-color: rgb(0, 76, 255);
-                --button-hover-bg-color: rgb(0, 50, 200);
-                --h1-color: #f2f2f7;
-            }
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: var(--container-bg-color);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-        h1 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: var(--h1-color);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        .time-input-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .time-input-group input {
-            width: 60px;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-sizing: border-box;
-            text-align: center;
-            background-color: var(--container-bg-color);
-            color: var(--text-color);
-        }
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--button-bg-color);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: var(--button-hover-bg-color);
-        }
-        .status {
-            margin-top: 15px;
-            color: green; /* Consider changing this for dark theme if needed */
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Настройки Wplan</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#067bf9",
+            "background-light": "#f5f7f8",
+            "background-dark": "#0f1923",
+            "surface-light": "#ffffff",
+            "surface-dark": "#1b2127",
+            "border-light": "#e5e7eb",
+            "border-dark": "#3a4755",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "1rem",
+            "xl": "1.5rem",
+            "full": "9999px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    .custom-checkbox {
+      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDt-XBQVqCwypidwllExQko4z6t-qRCSfkH9rS8kFdKCaSHKJk8f0q2GYAoS3YZTfHS53rudDJ8SbHcPY-j3UGJ8BiPt4nYqxBMIWMbbmlipVHHXYh2_X6MOozPcr-1kj3WSCLtDRDT49lJE0Ifrafi9hRdKFD1pzgthAoTKjMkPr19k2iVfaZZ31wb4Y1MyFAzTH7X9SUi4ItTRFwqdhprLHk2mOaGpsRd82ulBnIi-D2uuHm_wz8nCqnrm5sZx6b9ENYYl_Qah2ZR);
+    }
+    .tooltip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.95);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 6px 10px;
+      border-radius: 8px;
+      width: 250px;
+      white-space: normal;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+      z-index: 20;
+    }
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      bottom: calc(100% + 2px);
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+      z-index: 21;
+    }
+    .tooltip:hover::after,
+    .tooltip:focus::after,
+    .tooltip:hover::before,
+    .tooltip:focus::before {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-2px);
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Настройки</h1>
-        <p>Статус разрешений на уведомления: <span id="notification-permission-status"></span></p>
-        <p>Текущее время: <span id="current-time"></span></p>
-        <p id="work-status"></p>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" id="auto-start-enabled">
-                Автоматическое начало рабочего дня
-            </label>
-        </div>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" id="notifications-enabled">
-                Уведомления о начале/окончании
-            </label>
-        </div>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" id="auto-end-enabled">
-                Автоподсчет окончания рабочего дня
-            </label>
-        </div>
-        <div class="form-group">
-            <label>Время начала (если вкл.)</label>
-            <div class="time-input-group">
-                <input type="number" id="start-hour" min="0" max="23" placeholder="ЧЧ">
-                <span>:</span>
-                <input type="number" id="start-minute" min="0" max="59" placeholder="ММ">
-            </div>
-        </div>
-        <div class="form-group">
-            <label>Время окончания (если вкл.)</label>
-            <div class="time-input-group">
-                <input type="number" id="end-hour" min="0" max="23" placeholder="ЧЧ">
-                <span>:</span>
-                <input type="number" id="end-minute" min="0" max="59" placeholder="ММ">
-            </div>
-        </div>
-        <button id="save-btn">Сохранить</button>
-        <p id="status" class="status"></p>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-white h-screen flex items-center justify-center overflow-hidden">
+  <div class="relative flex flex-col w-[500px] h-[600px] bg-surface-light dark:bg-surface-dark shadow-2xl overflow-hidden rounded-xl border border-border-light dark:border-border-dark">
+    <div class="flex items-center justify-between px-6 my-4 py-4 border-b border-border-light dark:border-border-dark bg-surface-light/50 dark:bg-surface-dark/50 backdrop-blur-sm sticky top-0 z-10">
+      <h1 class="text-xl font-bold leading-tight tracking-tight">Настройки</h1>
     </div>
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar">
+      <section class="bg-slate-100 dark:bg-[#111418] rounded-lg p-4 grid grid-cols-3 gap-2 border border-border-light dark:border-border-dark">
+        <div class="flex flex-col items-start justify-center">
+          <span class="text-[10px] font-bold text-slate-500 dark:text-[#9baabb] uppercase tracking-wider mb-1.5">Статус</span>
+          <div class="flex items-center gap-2" id="work-status">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span class="text-sm font-semibold" id="work-status-text">В работе</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-center justify-center border-l border-r border-slate-200 dark:border-slate-800 px-2">
+          <span class="text-[10px] font-bold text-slate-500 dark:text-[#9baabb] uppercase tracking-wider mb-1.5">Осталось</span>
+          <p class="text-lg font-mono font-bold text-primary" id="remaining-time">--:--:--</p>
+        </div>
+        <div class="flex flex-col items-end justify-center">
+          <span class="text-[10px] font-bold text-slate-500 dark:text-[#9baabb] uppercase tracking-wider mb-1.5">Текущее время</span>
+          <p class="text-lg font-mono font-medium" id="current-time">--:--:--</p>
+        </div>
+      </section>
+      <section>
+        <h2 class="text-xs font-bold text-slate-500 dark:text-[#9baabb] mb-3 uppercase tracking-wide px-1">Автоматизация рабочего дня</h2>
+        <div class="space-y-2">
+          <label class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-[#151a21] transition-colors cursor-pointer border border-transparent hover:border-border-light dark:hover:border-border-dark group">
+            <span class="text-sm font-medium flex items-center gap-2">
+              Авто начало дня
+              <span class="tooltip text-slate-400" data-tooltip="Автоматически нажимает кнопку «Начать рабочий день» в заданное время." tabindex="0" role="img" aria-label="Описание: автоматически нажимает кнопку начала рабочего дня.">
+                <span class="material-symbols-outlined text-[16px]">info</span>
+              </span>
+            </span>
+            <input class="h-5 w-5 rounded border-slate-300 dark:border-[#3a4755] bg-transparent text-primary focus:ring-primary/20 focus:ring-offset-0 transition-all cursor-pointer checked:bg-primary custom-checkbox" id="auto-start-enabled" type="checkbox" />
+          </label>
+          <label class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-[#151a21] transition-colors cursor-pointer border border-transparent hover:border-border-light dark:hover:border-border-dark group">
+            <span class="text-sm font-medium flex items-center gap-2">
+              Авто расчет 8 часов
+              <span class="tooltip text-slate-400" data-tooltip="Автоматически рассчитывает время окончания как старт + 8 часов." tabindex="0" role="img" aria-label="Описание: автоматически считает окончание дня как старт плюс 8 часов.">
+                <span class="material-symbols-outlined text-[16px]">info</span>
+              </span>
+            </span>
+            <input class="h-5 w-5 rounded border-slate-300 dark:border-[#3a4755] bg-transparent text-primary focus:ring-primary/20 focus:ring-offset-0 transition-all cursor-pointer checked:bg-primary custom-checkbox" id="auto-end-enabled" type="checkbox" />
+          </label>
+        </div>
+      </section>
+      <section>
+        <h2 class="text-xs font-bold text-slate-500 dark:text-[#9baabb] mb-3 uppercase tracking-wide px-1">Время</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Время начала (ЧЧ:ММ)</label>
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <input class="w-full bg-slate-50 dark:bg-[#111418] border border-slate-300 dark:border-[#3a4755] text-center rounded-lg py-2.5 text-sm font-medium focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-shadow placeholder:text-slate-400 dark:placeholder:text-slate-600" id="start-hour" max="23" min="0" placeholder="09" type="number" />
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">ч</span>
+              </div>
+              <span class="self-center font-bold text-slate-400 pb-0.5">:</span>
+              <div class="relative flex-1">
+                <input class="w-full bg-slate-50 dark:bg-[#111418] border border-slate-300 dark:border-[#3a4755] text-center rounded-lg py-2.5 text-sm font-medium focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-shadow placeholder:text-slate-400 dark:placeholder:text-slate-600" id="start-minute" max="59" min="0" placeholder="00" type="number" />
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">м</span>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Время окончания (ЧЧ:ММ)</label>
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <input class="w-full bg-slate-50 dark:bg-[#111418] border border-slate-300 dark:border-[#3a4755] text-center rounded-lg py-2.5 text-sm font-medium focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-shadow placeholder:text-slate-400 dark:placeholder:text-slate-600" id="end-hour" max="23" min="0" placeholder="17" type="number" />
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">ч</span>
+              </div>
+              <span class="self-center font-bold text-slate-400 pb-0.5">:</span>
+              <div class="relative flex-1">
+                <input class="w-full bg-slate-50 dark:bg-[#111418] border border-slate-300 dark:border-[#3a4755] text-center rounded-lg py-2.5 text-sm font-medium focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-shadow placeholder:text-slate-400 dark:placeholder:text-slate-600" id="end-minute" max="59" min="0" placeholder="30" type="number" />
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">м</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2 class="text-xs font-bold text-slate-500 dark:text-[#9baabb] mb-3 uppercase tracking-wide px-1">Уведомления</h2>
+        <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-[#111418] rounded-lg border border-border-light dark:border-border-dark">
+          <div class="flex flex-col">
+            <span class="text-sm font-medium">Системные уведомления</span>
+            <div class="flex items-center gap-1.5 mt-1">
+              <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+              <span class="text-xs text-emerald-600 dark:text-emerald-500 font-medium" id="notification-permission-status">Разрешено</span>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input class="sr-only peer" id="notifications-enabled" type="checkbox" />
+            <div class="w-10 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+      </section>
+      <div class="h-2"></div>
+    </div>
+    <div class="p-6 border-t border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark mt-auto">
+      <button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/25 active:scale-[0.98]" id="save-btn" type="button">
+        <span class="material-symbols-outlined text-[20px]">save</span>
+        Сохранить
+      </button>
+    </div>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const autoStartCheckbox = document.getElementById('auto-start-enabled');
-            const notificationsCheckbox = document.getElementById('notifications-enabled');
-            const autoEndCheckbox = document.getElementById('auto-end-enabled');
-            const startHourInput = document.getElementById('start-hour');
-            const startMinuteInput = document.getElementById('start-minute');
-            const endHourInput = document.getElementById('end-hour');
-            const endMinuteInput = document.getElementById('end-minute');
-            const saveBtn = document.getElementById('save-btn');
-            const statusEl = document.getElementById('status');
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const autoStartCheckbox = document.getElementById('auto-start-enabled');
+      const notificationsCheckbox = document.getElementById('notifications-enabled');
+      const autoEndCheckbox = document.getElementById('auto-end-enabled');
+      const startHourInput = document.getElementById('start-hour');
+      const startMinuteInput = document.getElementById('start-minute');
+      const endHourInput = document.getElementById('end-hour');
+      const endMinuteInput = document.getElementById('end-minute');
+      const saveBtn = document.getElementById('save-btn');
+      const closeBtn = document.getElementById('close-btn');
+      const remainingTimeEl = document.getElementById('remaining-time');
+      const workStatusTextEl = document.getElementById('work-status-text');
+      const electronAPI = window.electronAPI;
 
-            // Запрашиваем и отображаем текущие настройки при загрузке
-            window.electronAPI.getNotificationPermissionStatus().then(isSupported => {
-                const statusEl = document.getElementById('notification-permission-status');
-                if (isSupported) {
-                    statusEl.textContent = 'Разрешены';
-                    statusEl.style.color = 'green';
-                } else {
-                    statusEl.textContent = 'Отклонены или не поддерживаются';
-                    statusEl.style.color = 'red';
-                }
-            });
-
-            window.electronAPI.getSettings().then(settings => {
-                startHourInput.value = settings.startHour ?? 9;
-                startMinuteInput.value = (settings.startMinute ?? 0).toString().padStart(2, '0');
-                endHourInput.value = settings.endHour ?? 18;
-                endMinuteInput.value = (settings.endMinute ?? 0).toString().padStart(2, '0');
-                autoStartCheckbox.checked = settings.autoStartEnabled ?? true;
-                notificationsCheckbox.checked = settings.notificationsEnabled ?? true;
-                autoEndCheckbox.checked = settings.autoEndEnabled ?? true;
-                toggleAutoEnd(autoEndCheckbox.checked);
-            });
-
-            function calculateEndTime() {
-                if (!autoEndCheckbox.checked) return;
-
-                let startHour = parseInt(startHourInput.value, 10);
-                let startMinute = parseInt(startMinuteInput.value, 10);
-
-                if (isNaN(startHour) || isNaN(startMinute)) return;
-
-                let endHour = startHour + 8;
-                if (endHour >= 24) {
-                    endHour -= 24;
-                }
-
-                endHourInput.value = endHour;
-                endMinuteInput.value = startMinute.toString().padStart(2, '0');
-            }
-
-            function toggleAutoEnd(enabled) {
-                endHourInput.disabled = enabled;
-                endMinuteInput.disabled = enabled;
-                if (enabled) {
-                    calculateEndTime();
-                }
-            }
-
-            autoEndCheckbox.addEventListener('change', () => {
-                toggleAutoEnd(autoEndCheckbox.checked);
-            });
-
-            startHourInput.addEventListener('input', calculateEndTime);
-            startMinuteInput.addEventListener('input', calculateEndTime);
-
-            saveBtn.addEventListener('click', () => {
-                const settings = {
-                    startHour: parseInt(startHourInput.value, 10),
-                    startMinute: parseInt(startMinuteInput.value, 10),
-                    endHour: parseInt(endHourInput.value, 10),
-                    endMinute: parseInt(endMinuteInput.value, 10),
-                    autoStartEnabled: autoStartCheckbox.checked,
-                    notificationsEnabled: notificationsCheckbox.checked,
-                    autoEndEnabled: autoEndCheckbox.checked
-                };
-                window.electronAPI.saveSettings(settings);
-                statusEl.textContent = 'Сохранено!';
-                setTimeout(() => statusEl.textContent = '', 2000);
-            });
-
-            const timeEl = document.getElementById('current-time');
-            const workStatusEl = document.getElementById('work-status');
-
-            async function updateTimers() {
-                const now = new Date();
-                timeEl.textContent = now.toLocaleTimeString();
-
-                try {
-                    const buttonState = await window.electronAPI.getButtonState();
-                    const settings = await window.electronAPI.getSettings();
-                    const endHour = settings.endHour ?? 18;
-                    const endMinute = settings.endMinute ?? 0;
-
-                    if (buttonState && buttonState.includes('Завершить')) {
-                        const endTime = new Date();
-                        endTime.setHours(endHour, endMinute, 0, 0);
-
-                        if (now < endTime) {
-                            const diff = endTime - now;
-                            const hours = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
-                            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-                            const seconds = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
-                            workStatusEl.textContent = `Осталось: ${hours}:${minutes}:${seconds}`;
-                        } else {
-                            workStatusEl.textContent = 'Рабочий день завершен.';
-                        }
-                    } else if (buttonState && buttonState.includes('Начать')) {
-                        workStatusEl.textContent = 'Рабочий день еще не начат.';
-                    } else {
-                        workStatusEl.textContent = 'Статус рабочего дня неизвестен.';
-                    }
-                } catch (error) {
-                    console.error('Ошибка при получении статуса:', error);
-                    workStatusEl.textContent = 'Не удалось загрузить статус.';
-                }
-            }
-
-            setInterval(updateTimers, 1000);
-            updateTimers();
-
-            // Apply theme based on system preference
-            const applySystemTheme = () => {
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                } else {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                }
-            };
-
-            applySystemTheme();
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
+      const statusEl = document.getElementById('notification-permission-status');
+      if (electronAPI && statusEl) {
+        electronAPI.getNotificationPermissionStatus().then((isSupported) => {
+          if (isSupported) {
+            statusEl.textContent = 'Разрешены';
+            statusEl.classList.remove('text-red-500');
+            statusEl.classList.add('text-emerald-600', 'dark:text-emerald-500');
+          } else {
+            statusEl.textContent = 'Отклонены или не поддерживаются';
+            statusEl.classList.remove('text-emerald-600', 'dark:text-emerald-500');
+            statusEl.classList.add('text-red-500');
+          }
         });
-    </script>
+      }
+
+      if (electronAPI) {
+        electronAPI.getSettings().then((settings) => {
+          startHourInput.value = settings.startHour ?? 9;
+          startMinuteInput.value = (settings.startMinute ?? 0).toString().padStart(2, '0');
+          endHourInput.value = settings.endHour ?? 18;
+          endMinuteInput.value = (settings.endMinute ?? 0).toString().padStart(2, '0');
+          autoStartCheckbox.checked = settings.autoStartEnabled ?? true;
+          notificationsCheckbox.checked = settings.notificationsEnabled ?? true;
+          autoEndCheckbox.checked = settings.autoEndEnabled ?? true;
+          toggleAutoEnd(autoEndCheckbox.checked);
+        });
+      }
+
+      function calculateEndTime() {
+        if (!autoEndCheckbox.checked) return;
+
+        const startHour = parseInt(startHourInput.value, 10);
+        const startMinute = parseInt(startMinuteInput.value, 10);
+
+        if (Number.isNaN(startHour) || Number.isNaN(startMinute)) return;
+
+        let endHour = startHour + 8;
+        if (endHour >= 24) {
+          endHour -= 24;
+        }
+
+        endHourInput.value = endHour;
+        endMinuteInput.value = startMinute.toString().padStart(2, '0');
+      }
+
+      function toggleAutoEnd(enabled) {
+        endHourInput.disabled = enabled;
+        endMinuteInput.disabled = enabled;
+        if (enabled) {
+          calculateEndTime();
+        }
+      }
+
+      autoEndCheckbox.addEventListener('change', () => {
+        toggleAutoEnd(autoEndCheckbox.checked);
+      });
+
+      startHourInput.addEventListener('input', calculateEndTime);
+      startMinuteInput.addEventListener('input', calculateEndTime);
+
+      saveBtn.addEventListener('click', () => {
+        const settings = {
+          startHour: parseInt(startHourInput.value, 10),
+          startMinute: parseInt(startMinuteInput.value, 10),
+          endHour: parseInt(endHourInput.value, 10),
+          endMinute: parseInt(endMinuteInput.value, 10),
+          autoStartEnabled: autoStartCheckbox.checked,
+          notificationsEnabled: notificationsCheckbox.checked,
+          autoEndEnabled: autoEndCheckbox.checked,
+        };
+        if (electronAPI) {
+          electronAPI.saveSettings(settings);
+        }
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          window.close();
+        });
+      }
+
+      const timeEl = document.getElementById('current-time');
+
+      async function updateTimers() {
+        const now = new Date();
+        timeEl.textContent = now.toLocaleTimeString();
+
+        try {
+          if (!electronAPI) {
+            remainingTimeEl.textContent = '--:--:--';
+            workStatusTextEl.textContent = 'Статус недоступен';
+            return;
+          }
+          const buttonState = await electronAPI.getButtonState();
+          const settings = await electronAPI.getSettings();
+          const endHour = settings.endHour ?? 18;
+          const endMinute = settings.endMinute ?? 0;
+
+          if (buttonState && buttonState.includes('Завершить')) {
+            const endTime = new Date();
+            endTime.setHours(endHour, endMinute, 0, 0);
+
+            if (now < endTime) {
+              const diff = endTime - now;
+              const hours = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+              const seconds = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+              remainingTimeEl.textContent = `${hours}:${minutes}:${seconds}`;
+              workStatusTextEl.textContent = 'В работе';
+            } else {
+              remainingTimeEl.textContent = '00:00:00';
+              workStatusTextEl.textContent = 'День завершен';
+            }
+          } else if (buttonState && buttonState.includes('Начать')) {
+            remainingTimeEl.textContent = '--:--:--';
+            workStatusTextEl.textContent = 'День не начат';
+          } else {
+            remainingTimeEl.textContent = '--:--:--';
+            workStatusTextEl.textContent = 'Статус неизвестен';
+          }
+        } catch (error) {
+          console.error('Ошибка при получении статуса:', error);
+          remainingTimeEl.textContent = '--:--:--';
+          workStatusTextEl.textContent = 'Ошибка статуса';
+        }
+      }
+
+      setInterval(updateTimers, 1000);
+      updateTimers();
+
+      const applySystemTheme = () => {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      };
+
+      applySystemTheme();
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
+    });
+  </script>
 </body>
 </html>

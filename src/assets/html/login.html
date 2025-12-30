@@ -1,58 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html class="dark" lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Авторизация</title>
-    <link rel="stylesheet" href="../css/login.css">
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Экран входа Wplan</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#067bf9",
+            "background-light": "#f5f7f8",
+            "background-dark": "#0f1923",
+            "surface-dark": "#1b2127",
+            "surface-border": "#3a4755",
+            "text-secondary": "#9baabb",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "1rem",
+            "xl": "1.5rem",
+            "full": "9999px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3a4755;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #556980;
+    }
+    .drag-region {
+      -webkit-app-region: drag;
+    }
+    .no-drag {
+      -webkit-app-region: no-drag;
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Вход в Wplan</h1>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="username">Логин</label>
-                <input type="text" id="username" name="username" required>
+<body class="flex items-center justify-center min-h-screen bg-gray-900 font-display">
+  <div class="relative w-[400px] h-[600px] overflow-hidden bg-background-light dark:bg-background-dark shadow-2xl rounded-lg flex flex-col group/design-root">
+    <div class="drag-region absolute top-0 left-0 w-full h-8 z-50 flex justify-end items-center px-2"></div>
+    <div class="flex-1 flex flex-col px-8 py-6 justify-center">
+      <div class="flex flex-col items-center mb-8">
+        <div class="w-[100px] h-[100px] mb-4 flex items-center justify-center relative">
+          <div class="absolute inset-0 bg-primary/10 rounded-full animate-pulse"></div>
+          <div class="w-20 h-20 bg-gradient-to-br from-primary to-blue-600 rounded-2xl rotate-3 flex items-center justify-center shadow-lg shadow-primary/20 z-10">
+            <span class="material-symbols-outlined text-white text-[48px]">auto_graph</span>
+          </div>
+          <div class="w-20 h-20 border-2 border-primary/30 rounded-2xl -rotate-6 absolute z-0"></div>
+        </div>
+        <h1 class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight mb-1">Wplan</h1>
+        <p class="text-gray-500 dark:text-text-secondary text-sm font-medium">Портал автоматизации и настроек</p>
+      </div>
+      <form class="flex flex-col gap-5 w-full no-drag" id="login-form">
+        <div class="flex flex-col gap-2">
+          <label class="text-gray-900 dark:text-white text-sm font-medium ml-1" for="username">Логин</label>
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-gray-400 group-focus-within:text-primary transition-colors text-[20px]">person</span>
             </div>
-            <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required>
+            <input autocomplete="username" class="w-full h-12 pl-11 pr-4 bg-white dark:bg-surface-dark border border-gray-300 dark:border-surface-border rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-text-secondary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all duration-200 text-sm" id="username" placeholder="Введите ваш логин" type="text" required />
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between items-end">
+            <label class="text-gray-900 dark:text-white text-sm font-medium ml-1" for="password">Пароль</label>
+          </div>
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-gray-400 group-focus-within:text-primary transition-colors text-[20px]">lock</span>
             </div>
-            <button type="submit">Войти</button>
-            <p id="error-message" class="error"></p>
-        </form>
+            <input autocomplete="current-password" class="w-full h-12 pl-11 pr-11 bg-white dark:bg-surface-dark border border-gray-300 dark:border-surface-border rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-text-secondary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all duration-200 text-sm" id="password" placeholder="Введите ваш пароль" type="password" required />
+            <button class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white transition-colors cursor-pointer focus:outline-none" id="toggle-password" type="button">
+              <span class="material-symbols-outlined text-[20px]" id="toggle-password-icon">visibility</span>
+            </button>
+          </div>
+        </div>
+        <div class="text-red-500 text-xs font-medium text-center min-h-[20px] flex items-center justify-center gap-1 opacity-0" id="error-message">
+          <span class="material-symbols-outlined text-[16px]">error</span>
+          <span id="error-message-text"></span>
+        </div>
+        <button class="w-full h-[44px] bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg shadow-lg shadow-primary/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-1" type="submit">
+          <span>Войти</span>
+          <span class="material-symbols-outlined text-[20px]">login</span>
+        </button>
+      </form>
     </div>
+    <div class="py-4 text-center border-t border-gray-200 dark:border-surface-border bg-gray-50 dark:bg-surface-dark/50 backdrop-blur-sm">
+      <p class="text-xs text-gray-500 dark:text-gray-600">Клиент Wplan v1.2.0 • <a class="hover:text-primary transition-colors" href="#">Помощь</a></p>
+    </div>
+  </div>
 
-    <script>
-        const form = document.getElementById('login-form');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const errorMessage = document.getElementById('error-message');
+  <script>
+    const form = document.getElementById('login-form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorMessage = document.getElementById('error-message');
+    const errorMessageText = document.getElementById('error-message-text');
+    const togglePassword = document.getElementById('toggle-password');
+    const togglePasswordIcon = document.getElementById('toggle-password-icon');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            errorMessage.textContent = '';
-            const credentials = {
-                username: usernameInput.value,
-                password: passwordInput.value
-            };
-            const result = await window.electronAPI.login(credentials);
-            if (!result.success) {
-                errorMessage.textContent = result.message || 'Произошла ошибка';
-            }
-        });
-    </script>
-    <script>
-        // Apply theme based on system preference
-        const applySystemTheme = () => {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        };
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMessageText.textContent = '';
+      errorMessage.classList.add('opacity-0');
+      errorMessage.classList.remove('opacity-100');
 
-        applySystemTheme();
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
-    </script>
+      const credentials = {
+        username: usernameInput.value,
+        password: passwordInput.value,
+      };
+      const result = await window.electronAPI.login(credentials);
+      if (!result.success) {
+        errorMessageText.textContent = result.message || 'Произошла ошибка';
+        errorMessage.classList.remove('opacity-0');
+        errorMessage.classList.add('opacity-100');
+      }
+    });
+
+    togglePassword.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      togglePasswordIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+    });
+
+    const applySystemTheme = () => {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    applySystemTheme();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
+  </script>
 </body>
 </html>
