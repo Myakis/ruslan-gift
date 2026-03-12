@@ -112,6 +112,21 @@
       window.electronAPI?.logout?.();
     });
 
+    const wv = document.getElementById('wplan-webview');
+    console.log('[wv] exists:', !!wv);
+    if (wv) {
+      try {
+        console.log('[wv] initial url:', wv.getURL ? wv.getURL() : '(getURL unavailable)');
+      } catch (e) {
+        console.warn('[wv] getURL error:', e);
+      }
+      wv.addEventListener('did-start-loading', () => console.log('[wv] did-start-loading'));
+      wv.addEventListener('did-stop-loading', () => console.log('[wv] did-stop-loading'));
+      wv.addEventListener('dom-ready', () => console.log('[wv] dom-ready'));
+      wv.addEventListener('did-fail-load', (e) => console.error('[wv] did-fail-load:', e));
+      wv.addEventListener('console-message', (e) => console.log('[wv console]:', e.message));
+    }
+
     const applySystemTheme = () => {
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
