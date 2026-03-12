@@ -17,6 +17,4 @@ const electrobun = new Electrobun.Electroview({ rpc });
   logout: () => electrobun.rpc!.send.logout({}),
   reloadWplan: () => electrobun.rpc!.send.reloadWplan({}),
   typeInDebugger: (text: string) => electrobun.rpc!.send.typeInDebugger({ text }),
-  getCredentials: () => electrobun.rpc!.request.getCredentials({}),
 };
-
