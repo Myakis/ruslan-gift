@@ -84,7 +84,8 @@
       </div>
     </header>
 
-    <main class="flex-1 bg-[#0b1730]">
+    <main class="flex-1 bg-[#0b1730] relative">
+      <div id="wv-debug" style="position:absolute;top:8px;left:8px;z-index:50;background:rgba(0,0,0,.6);color:#fff;padding:6px 8px;border-radius:6px;font-size:11px;">webview: init</div>
       <electrobun-webview id="wplan-webview" src="https://wplan.office.lan/" style="width:100%;height:100%;display:block;"></electrobun-webview>
     </main>
   </div>
@@ -102,6 +103,9 @@
 
   <script type="module" src="./index.js"></script>
   <script>
+    const dbg = document.getElementById('wv-debug');
+    const setDbg = (t) => { if (dbg) dbg.textContent = `webview: ${t}`; };
+
     document.getElementById('settings-btn').addEventListener('click', () => {
       window.electronAPI?.openSettings?.();
     });
@@ -118,10 +122,15 @@
     });
 
     async function setupWebviewAutomation() {
+      setDbg('waiting custom element');
       await customElements.whenDefined('electrobun-webview');
+      setDbg('custom element ready');
       const wv = document.getElementById('wplan-webview');
       console.log('[wv] exists:', !!wv);
-      if (!wv || typeof wv.on !== 'function') return;
+      if (!wv || typeof wv.on !== 'function') {
+        setDbg('element not ready/on missing');
+        return;
+      }
 
       const injectAutologin = async () => {
         try {
@@ -175,21 +184,26 @@
         }
       };
 
-      wv.on('did-start-loading', () => console.log('[wv] did-start-loading'));
-      wv.on('did-stop-loading', () => console.log('[wv] did-stop-loading'));
+      wv.on('did-start-loading', () => { console.log('[wv] did-start-loading'); setDbg('did-start-loading'); });
+      wv.on('did-stop-loading', () => { console.log('[wv] did-stop-loading'); setDbg('did-stop-loading'); });
       wv.on('dom-ready', async (e) => {
         console.log('[wv] dom-ready', e?.detail ?? '');
+        setDbg('dom-ready');
         await injectAutologin();
       });
       wv.on('did-navigate', async () => {
         // повторная попытка после редиректов /sign-in
         await injectAutologin();
       });
-      wv.on('did-fail-load', (e) => console.error('[wv] did-fail-load:', e?.detail ?? e));
+      wv.on('did-fail-load', (e) => { console.error('[wv] did-fail-load:', e?.detail ?? e); setDbg('did-fail-load'); });
       wv.on('console-message', (e) => console.log('[wv console]:', e?.detail ?? e));
     }
 
     setupWebviewAutomation();
+    setTimeout(() => {
+      if (customElements.get('electrobun-webview')) return;
+      setDbg('custom element not registered');
+    }, 2000);
 
     const applySystemTheme = () => {
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
