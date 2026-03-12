@@ -9,6 +9,8 @@ let loginWindow: BrowserWindow | null = null;
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
 let wplanView: BrowserView | null = null;
+let lastButtonState: string | null = null;
+let buttonStatePollTimer: Timer | null = null;
 
 const MENU_BAR_HEIGHT = 50;
 
@@ -35,8 +37,8 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
         return { success: true };
       },
       getButtonState: async () => {
-        if (!wplanView) return null;
-        return getButtonState(wplanView);
+        // Возвращаем быстрый кэш, чтобы settings-окно не ловило RPC timeout.
+        return lastButtonState;
       },
       getNotificationPermissionStatus: () => isNotificationsSupported(),
       getSessionState: () => ({
@@ -53,6 +55,11 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
         mainWindow?.close();
         mainWindow = null;
         wplanView = null;
+        lastButtonState = null;
+        if (buttonStatePollTimer) {
+          clearInterval(buttonStatePollTimer);
+          buttonStatePollTimer = null;
+        }
         openLoginWindow();
       },
       reloadWplan: () => {
@@ -111,6 +118,19 @@ function resizeWplanView() {
     width: frame.width,
     height: Math.max(0, frame.height - MENU_BAR_HEIGHT),
   };
+}
+
+async function probeButtonState(view: BrowserView) {
+  try {
+    const jsPromise = view.executeJavascript(`(() => {
+      const el = document.querySelector('#startEndWorkButton');
+      return el ? (el.innerText || '').trim() : null;
+    })();`) as Promise<string | null>;
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 700));
+    lastButtonState = await Promise.race([jsPromise, timeoutPromise]);
+  } catch {
+    lastButtonState = null;
+  }
 }
 
 async function tryAutoLogin(view: BrowserView) {
@@ -222,10 +242,17 @@ function openMainWindow() {
     if (!wplanView) return;
     scheduleAutoLogin();
     setupScheduler(wplanView, store.getSettings());
+    void probeButtonState(wplanView);
+
+    if (buttonStatePollTimer) clearInterval(buttonStatePollTimer);
+    buttonStatePollTimer = setInterval(() => {
+      if (wplanView) void probeButtonState(wplanView);
+    }, 3000);
   });
 
   wplanView.on("did-navigate", () => {
     scheduleAutoLogin();
+    if (wplanView) void probeButtonState(wplanView);
   });
 
   mainWindow.on("resize", resizeWplanView);
@@ -234,6 +261,11 @@ function openMainWindow() {
     wplanView?.remove();
     wplanView = null;
     mainWindow = null;
+    lastButtonState = null;
+    if (buttonStatePollTimer) {
+      clearInterval(buttonStatePollTimer);
+      buttonStatePollTimer = null;
+    }
   });
 
   setTimeout(() => {
