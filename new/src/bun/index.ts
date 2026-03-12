@@ -105,7 +105,7 @@ function openLoginWindow() {
   if (loginWindow) return loginWindow;
   loginWindow = new BrowserWindow({
     title: "Wplan Auto - Login",
-    url: "views://login/index.html",
+    url: "views://login",
     rpc,
     frame: { width: 400, height: 600, x: 240, y: 160 },
   });
@@ -117,7 +117,7 @@ function openSettingsWindow() {
   if (settingsWindow) return settingsWindow.focus();
   settingsWindow = new BrowserWindow({
     title: "Wplan Auto - Settings",
-    url: "views://settings/index.html",
+    url: "views://settings",
     rpc,
     frame: { width: 500, height: 600, x: 280, y: 180 },
   });
@@ -128,7 +128,7 @@ function openMainWindow() {
   if (mainWindow) return mainWindow.focus();
   mainWindow = new BrowserWindow({
     title: "Wplan Auto",
-    url: "views://main/index.html",
+    url: "views://main",
     rpc,
     frame: { width: 1200, height: 800, x: 120, y: 80 },
   });
