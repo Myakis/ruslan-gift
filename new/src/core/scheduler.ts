@@ -87,5 +87,5 @@ export function setupScheduler(view: BrowserView, settings: Settings) {
   };
 
   schedulePoint(settings.startHour, settings.startMinute, "Начать", "Начало дня", "Рабочий день начался");
-  schedulePoint(settings.endHour, settings.endMinute, "Завершить", "Конец дня", "Рабочий день завершен");
+  schedulePoint(settings.endHour, settings.endMinute, "Заверш", "Конец дня", "Рабочий день завершен");
 }
