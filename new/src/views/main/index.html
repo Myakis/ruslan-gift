@@ -242,6 +242,7 @@
       wv.on('did-stop-loading', () => {
         setStatus({ webview: 'ready' });
         focusWebview();
+        void injectAutologin('did-stop-loading');
       });
       wv.on('did-navigate', () => void handleReady('navigate'));
       wv.on('did-fail-load', (e) => {
@@ -251,6 +252,20 @@
 
       wv.addEventListener('mousedown', focusWebview, true);
       wv.addEventListener('mouseenter', focusWebview, true);
+
+      // первая попытка сразу после инициализации
+      void injectAutologin('init');
+
+      // и несколько повторных попыток на случай позднего рендера формы/редиректов
+      let tries = 0;
+      const retryTimer = setInterval(() => {
+        if (autologinDone || tries >= 12) {
+          clearInterval(retryTimer);
+          return;
+        }
+        tries += 1;
+        void injectAutologin(`retry-${tries}`);
+      }, 1500);
 
       setTimeout(() => {
         if (!autologinAttempted) {
