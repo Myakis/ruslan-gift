@@ -167,7 +167,7 @@
       const injectAutologin = async (reason) => {
         if (autologinDone) return;
         try {
-          const creds = await window.electronAPI?.getCredentials?.();
+          const creds = (await window.electronAPI?.getCredentials?.()) || window.__WPLAN_CREDS__ || null;
           if (!creds?.username || !creds?.password) {
             setStatus({ autologin: 'no-cred' });
             return;

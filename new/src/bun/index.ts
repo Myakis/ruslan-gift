@@ -118,8 +118,22 @@ function openMainWindow() {
   });
 
   // На текущем этапе рендерим Wplan через <electrobun-webview> внутри main HTML.
-  // Отдельный BrowserView отключён, чтобы избежать гонки attach к окну.
   wplanView = null;
+
+  // Fallback: прокидываем креды напрямую в root views-контекст,
+  // даже если renderer bridge не инициализировался.
+  const creds = store.getCredentials();
+  if (creds?.username && creds?.password) {
+    const js = `window.__WPLAN_CREDS__ = ${JSON.stringify(creds)};`;
+    try {
+      (mainWindow as any).webview?.on?.('dom-ready', () => {
+        void (mainWindow as any).webview?.executeJavascript?.(js);
+      });
+      setTimeout(() => {
+        void (mainWindow as any).webview?.executeJavascript?.(js);
+      }, 500);
+    } catch {}
+  }
 
   mainWindow.on("close", () => {
     mainWindow = null;
