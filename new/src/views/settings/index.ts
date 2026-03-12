@@ -13,8 +13,10 @@ const rpc = Electroview.defineRPC<WplanRPC>({
 const view = new Electroview({ rpc });
 
 (window as any).electronAPI = {
-  getSettings: () => view.rpc.request.getSettings({}),
-  saveSettings: (settings: Settings) => view.rpc.request.saveSettings(settings),
-  getButtonState: () => view.rpc.request.getButtonState({}),
-  getNotificationPermissionStatus: () => view.rpc.request.getNotificationPermissionStatus({}),
+  getSettings: () => view.rpc.bun.request.getSettings({}),
+  saveSettings: (settings: Settings) => view.rpc.bun.request.saveSettings(settings),
+  getButtonState: () => view.rpc.bun.request.getButtonState({}),
+  getNotificationPermissionStatus: () => view.rpc.bun.request.getNotificationPermissionStatus({}),
 };
+
+console.log("[settings-view] rpc bridge ready");

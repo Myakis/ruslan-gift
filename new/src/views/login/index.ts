@@ -15,5 +15,7 @@ const rpc = Electroview.defineRPC<WplanRPC>({
 const view = new Electroview({ rpc });
 
 (window as any).electronAPI = {
-  login: (credentials: { username: string; password: string }) => view.rpc.request.login(credentials),
+  login: (credentials: { username: string; password: string }) => view.rpc.bun.request.login(credentials),
 };
+
+console.log("[login-view] rpc bridge ready");

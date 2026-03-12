@@ -13,8 +13,10 @@ const rpc = Electroview.defineRPC<WplanRPC>({
 const view = new Electroview({ rpc });
 
 (window as any).electronAPI = {
-  openSettings: () => view.rpc.send.openSettings({}),
-  logout: () => view.rpc.send.logout({}),
-  reloadWplan: () => view.rpc.send.reloadWplan({}),
-  typeInDebugger: (text: string) => view.rpc.send.typeInDebugger({ text }),
+  openSettings: () => view.rpc.bun.send.openSettings({}),
+  logout: () => view.rpc.bun.send.logout({}),
+  reloadWplan: () => view.rpc.bun.send.reloadWplan({}),
+  typeInDebugger: (text: string) => view.rpc.bun.send.typeInDebugger({ text }),
 };
+
+console.log("[main-view] rpc bridge ready");

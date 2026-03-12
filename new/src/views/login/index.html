@@ -130,9 +130,19 @@
         username: usernameInput.value,
         password: passwordInput.value,
       };
-      const result = await window.electronAPI.login(credentials);
-      if (!result.success) {
-        errorMessageText.textContent = result.message || 'Произошла ошибка';
+      try {
+        if (!window.electronAPI || typeof window.electronAPI.login !== 'function') {
+          throw new Error('Bridge not ready');
+        }
+        const result = await window.electronAPI.login(credentials);
+        if (!result?.success) {
+          errorMessageText.textContent = result?.message || 'Неверные данные для входа';
+          errorMessage.classList.remove('opacity-0');
+          errorMessage.classList.add('opacity-100');
+        }
+      } catch (err) {
+        console.error('Login failed:', err);
+        errorMessageText.textContent = 'Ошибка инициализации входа. Перезапустите приложение.';
         errorMessage.classList.remove('opacity-0');
         errorMessage.classList.add('opacity-100');
       }
