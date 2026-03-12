@@ -30,18 +30,25 @@ function clearTimers() {
 }
 
 export async function getButtonState(view: BrowserView): Promise<string | null> {
-  try {
-    // Поведение как в old Electron: прямой executeJavascript без внутреннего RPC-request timeout.
-    const jsPromise = view.executeJavascript(`(() => {
-      const el = document.querySelector('#startEndWorkButton');
-      return el ? (el.innerText || '').trim() : null;
-    })();`);
+  const probeScript = `(() => {
+    const el = document.querySelector('#startEndWorkButton');
+    return el ? (el.innerText || '').trim() : null;
+  })();`;
 
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 900));
-    return await Promise.race([jsPromise as Promise<string | null>, timeoutPromise]);
-  } catch {
-    return null;
+  // Как и в автологине: несколько коротких попыток вместо одной.
+  for (let i = 0; i < 6; i++) {
+    try {
+      const jsPromise = view.executeJavascript(probeScript) as Promise<string | null>;
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 800));
+      const state = await Promise.race([jsPromise, timeoutPromise]);
+      if (state) return state;
+    } catch {
+      // ignore and retry
+    }
+    await new Promise((r) => setTimeout(r, 180));
   }
+
+  return null;
 }
 
 async function clickStartEndButton(view: BrowserView) {
