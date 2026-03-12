@@ -86,6 +86,35 @@
   <script>
     const statusEl = document.getElementById('runtime-status');
     const status = { bridge: 'init', webview: 'init', autologin: 'idle' };
+
+    // Fallback bridge init in case module entry was not applied for any reason
+    (function ensureBridge() {
+      if (window.electronAPI?.getCredentials) return;
+      try {
+        const EV = window.Electrobun?.Electroview;
+        if (!EV) return;
+
+        const rpc = EV.defineRPC({
+          handlers: {
+            requests: { ping: () => ({ ok: true }) },
+            messages: {
+              schedulerEvent: ({ type, message }) => console[type === 'error' ? 'error' : 'log']('scheduler:', message),
+            },
+          },
+        });
+
+        const eb = new window.Electrobun.Electroview({ rpc });
+        window.electronAPI = {
+          openSettings: () => eb.rpc?.send?.openSettings?.({}),
+          logout: () => eb.rpc?.send?.logout?.({}),
+          reloadWplan: () => eb.rpc?.send?.reloadWplan?.({}),
+          typeInDebugger: (text) => eb.rpc?.send?.typeInDebugger?.({ text }),
+          getCredentials: () => eb.rpc?.request?.getCredentials?.({}),
+        };
+      } catch (e) {
+        console.warn('[main-view] bridge fallback init failed', e);
+      }
+    })();
     const setStatus = (patch) => {
       Object.assign(status, patch);
       if (statusEl) {
