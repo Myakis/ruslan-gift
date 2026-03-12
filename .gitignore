@@ -90,3 +90,7 @@ typings/
 
 # Electron-Forge
 out/
+
+# ElectroBun / generic build artifacts
+build/
+new/build/
