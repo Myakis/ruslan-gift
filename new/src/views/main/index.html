@@ -129,7 +129,52 @@
       if (typeof wv.on === 'function') {
         wv.on('did-start-loading', () => console.log('[wv] did-start-loading'));
         wv.on('did-stop-loading', () => console.log('[wv] did-stop-loading'));
-        wv.on('dom-ready', (e) => console.log('[wv] dom-ready', e?.detail ?? ''));
+        wv.on('dom-ready', async (e) => {
+          console.log('[wv] dom-ready', e?.detail ?? '');
+          try {
+            const creds = await window.electronAPI?.getCredentials?.();
+            if (!creds?.username || !creds?.password) return;
+
+            const u = JSON.stringify(creds.username);
+            const p = JSON.stringify(creds.password);
+            const script = `
+              (async function() {
+                function waitForElement(selector, timeout = 12000) {
+                  return new Promise((resolve, reject) => {
+                    const initial = document.querySelector(selector);
+                    if (initial) return resolve(initial);
+                    const observer = new MutationObserver(() => {
+                      const found = document.querySelector(selector);
+                      if (found) { observer.disconnect(); resolve(found); }
+                    });
+                    observer.observe(document.body, { childList: true, subtree: true });
+                    setTimeout(() => { observer.disconnect(); reject(new Error('timeout')); }, timeout);
+                  });
+                }
+                try {
+                  const loginButton = await waitForElement('#loginButton');
+                  const usernameField = document.querySelector('input[name="login"]');
+                  const passwordField = document.querySelector('input[name="password"]');
+                  if (!usernameField || !passwordField) return;
+                  const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                  setValue.call(usernameField, ${u});
+                  usernameField.dispatchEvent(new Event('input', { bubbles: true }));
+                  setValue.call(passwordField, ${p});
+                  passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+                  loginButton.click();
+                } catch (err) {
+                  console.error('autologin in webview failed', err);
+                }
+              })();`;
+
+            if (typeof wv.executeJavascript === 'function') {
+              wv.executeJavascript(script);
+              console.log('[wv] autologin script injected');
+            }
+          } catch (err) {
+            console.error('[wv] autologin init failed', err);
+          }
+        });
         wv.on('did-fail-load', (e) => console.error('[wv] did-fail-load:', e?.detail ?? e));
         wv.on('console-message', (e) => console.log('[wv console]:', e?.detail ?? e));
       }

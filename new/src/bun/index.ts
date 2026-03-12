@@ -46,6 +46,7 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
         isLoggedIn: Boolean(mainWindow),
         url: "https://wplan.office.lan/",
       }),
+      getCredentials: () => store.getCredentials(),
     },
     messages: {
       openSettings: () => openSettingsWindow(),

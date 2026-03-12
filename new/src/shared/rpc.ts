@@ -27,6 +27,7 @@ export type WplanRPC = {
         params: {};
         response: { hasCredentials: boolean; isLoggedIn: boolean; url: string };
       };
+      getCredentials: { params: {}; response: Credentials | null };
     };
     messages: {
       openSettings: {};
