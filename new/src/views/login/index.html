@@ -131,10 +131,13 @@
         password: passwordInput.value,
       };
       try {
-        if (!window.electronAPI || typeof window.electronAPI.login !== 'function') {
-          throw new Error('Bridge not ready');
+        const rpc = window.electrobun?.rpc;
+        const legacy = window.electronAPI;
+        const loginFn = rpc?.request?.login || legacy?.login;
+        if (typeof loginFn !== 'function') {
+          throw new Error('RPC bridge not ready');
         }
-        const result = await window.electronAPI.login(credentials);
+        const result = await loginFn(credentials);
         if (!result?.success) {
           errorMessageText.textContent = result?.message || 'Неверные данные для входа';
           errorMessage.classList.remove('opacity-0');

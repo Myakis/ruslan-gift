@@ -208,7 +208,13 @@
       const closeBtn = document.getElementById('close-btn');
       const remainingTimeEl = document.getElementById('remaining-time');
       const workStatusTextEl = document.getElementById('work-status-text');
-      const electronAPI = window.electronAPI;
+      const rpc = window.electrobun?.rpc;
+      const electronAPI = window.electronAPI ?? (rpc ? {
+        getNotificationPermissionStatus: () => rpc.request.getNotificationPermissionStatus({}),
+        getSettings: () => rpc.request.getSettings({}),
+        saveSettings: (settings) => rpc.request.saveSettings(settings),
+        getButtonState: () => rpc.request.getButtonState({}),
+      } : null);
 
       const statusEl = document.getElementById('notification-permission-status');
       if (electronAPI && statusEl) {

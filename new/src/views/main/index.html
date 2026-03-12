@@ -97,14 +97,16 @@
   </style>
 
   <script>
+    const rpc = window.electrobun?.rpc;
+
     document.getElementById('settings-btn').addEventListener('click', () => {
-      window.electronAPI.openSettings();
+      rpc?.send?.openSettings?.({});
     });
     document.getElementById('reload-btn').addEventListener('click', () => {
-      window.electronAPI.reloadWplan();
+      rpc?.send?.reloadWplan?.({});
     });
     document.getElementById('logout-btn').addEventListener('click', () => {
-      window.electronAPI.logout();
+      rpc?.send?.logout?.({});
     });
 
     const applySystemTheme = () => {
