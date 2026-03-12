@@ -1,0 +1,59 @@
+name: ElectroBun Build and Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'electrobun-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        working-directory: new
+        run: bun install
+      - name: Build Electrobun (macOS arm64+x64)
+        working-directory: new
+        run: bun run build:mac
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrobun-macos
+          path: new/artifacts/**
+      - name: Publish release artifacts (macOS)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: new/artifacts/**
+          prerelease: ${{ contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
+          generate_release_notes: true
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        working-directory: new
+        run: bun install
+      - name: Build Electrobun (Windows x64)
+        working-directory: new
+        run: bun run build:win
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrobun-windows
+          path: new/artifacts/**
+      - name: Publish release artifacts (Windows)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: new/artifacts/**
+          prerelease: ${{ contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
+          generate_release_notes: true

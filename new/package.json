@@ -1,0 +1,22 @@
+{
+  "name": "wplan-auto-electrobun",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Wplan Auto migrated to ElectroBun runtime",
+  "scripts": {
+    "dev": "electrobun dev --watch",
+    "start": "electrobun dev",
+    "build": "electrobun build --env=stable",
+    "build:mac": "electrobun build --env=stable --targets=macos-arm64,macos-x64",
+    "build:win": "electrobun build --env=stable --targets=win-x64",
+    "build:release": "electrobun build --env=stable --targets=macos-arm64,macos-x64,win-x64",
+    "build:canary": "electrobun build --env=canary --targets=macos-arm64,macos-x64,win-x64"
+  },
+  "dependencies": {
+    "electrobun": "1.15.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.9.2"
+  }
+}
