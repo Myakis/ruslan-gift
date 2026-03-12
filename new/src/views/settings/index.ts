@@ -19,4 +19,3 @@ const electrobun = new Electrobun.Electroview({ rpc });
   getNotificationPermissionStatus: () => electrobun.rpc!.request.getNotificationPermissionStatus({}),
 };
 
-console.log("[settings-view] rpc bridge ready");

@@ -33,40 +33,32 @@
     };
   </script>
   <style>
-    .app-window {
-      width: 1200px;
-      height: 800px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #4b5563;
-      border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background-color: #6b7280;
+    .app-window { width: 100%; height: 100%; overflow: hidden; }
+    .status-chip {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 60;
+      background: rgba(2, 6, 23, 0.72);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 999px;
+      font-size: 11px;
+      line-height: 1;
+      padding: 8px 10px;
+      backdrop-filter: blur(6px);
+      user-select: none;
     }
   </style>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gray-900 font-display">
-  <div class="app-window flex flex-col bg-background-light dark:bg-background-dark rounded-xl border border-border-dark relative">
+<body class="h-screen w-screen bg-gray-900 font-display overflow-hidden">
+  <div class="app-window flex flex-col bg-background-light dark:bg-background-dark border border-border-dark relative">
     <header class="h-[50px] shrink-0 flex items-center justify-between px-4 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-border-dark select-none z-20 shadow-sm" id="menu-bar">
       <div class="flex items-center gap-3">
         <div class="flex items-center justify-center size-8 bg-primary/10 rounded-lg">
           <span class="material-symbols-outlined text-primary" style="font-size: 20px;">dataset</span>
         </div>
         <h1 class="text-gray-900 dark:text-white font-bold text-lg tracking-tight">Wplan</h1>
-        <div class="ml-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
-          <div class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Онлайн</span>
-        </div>
       </div>
       <div class="flex-1 h-full mx-4" style="-webkit-app-region: drag;"></div>
       <div class="flex items-center gap-2">
@@ -85,30 +77,25 @@
     </header>
 
     <main class="flex-1 bg-[#0b1730] relative">
-      <div id="wv-debug" style="position:absolute;top:8px;left:8px;z-index:50;background:rgba(0,0,0,.6);color:#fff;padding:6px 8px;border-radius:6px;font-size:11px;">webview: init</div>
       <electrobun-webview id="wplan-webview" src="https://wplan.office.lan/" style="width:100%;height:100%;display:block;"></electrobun-webview>
+      <div class="status-chip" id="runtime-status">bridge:init · webview:init · autologin:idle</div>
     </main>
   </div>
 
-  <style>
-    @keyframes loading {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(400%);
-      }
-    }
-  </style>
-
   <script type="module" src="./index.js"></script>
   <script>
-    const dbg = document.getElementById('wv-debug');
-    const setDbg = (t) => { if (dbg) dbg.textContent = `webview: ${t}`; };
+    const statusEl = document.getElementById('runtime-status');
+    const status = { bridge: 'init', webview: 'init', autologin: 'idle' };
+    const setStatus = (patch) => {
+      Object.assign(status, patch);
+      if (statusEl) {
+        statusEl.textContent = `bridge:${status.bridge} · webview:${status.webview} · autologin:${status.autologin}`;
+      }
+    };
 
-    document.getElementById('settings-btn').addEventListener('click', () => {
-      window.electronAPI?.openSettings?.();
-    });
+    const logWarn = (...args) => console.warn('[main-view]', ...args);
+
+    document.getElementById('settings-btn').addEventListener('click', () => window.electronAPI?.openSettings?.());
     document.getElementById('reload-btn').addEventListener('click', () => {
       const wv = document.getElementById('wplan-webview');
       if (wv && typeof wv.reload === 'function') {
@@ -117,93 +104,131 @@
         window.location.reload();
       }
     });
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      window.electronAPI?.logout?.();
-    });
+    document.getElementById('logout-btn').addEventListener('click', () => window.electronAPI?.logout?.());
+
+    const focusWebview = () => {
+      const wv = document.getElementById('wplan-webview');
+      if (!wv) return;
+      if (typeof wv.focus === 'function') wv.focus();
+      requestAnimationFrame(() => {
+        if (typeof wv.focus === 'function') wv.focus();
+      });
+    };
 
     async function setupWebviewAutomation() {
-      setDbg('waiting custom element');
+      const bridgeReady = typeof window.electronAPI?.getCredentials === 'function';
+      setStatus({ bridge: bridgeReady ? 'ok' : 'missing' });
+      if (!bridgeReady) {
+        logWarn('RPC bridge missing (window.electronAPI.getCredentials unavailable)');
+      }
+
       await customElements.whenDefined('electrobun-webview');
-      setDbg('custom element ready');
       const wv = document.getElementById('wplan-webview');
-      console.log('[wv] exists:', !!wv);
       if (!wv || typeof wv.on !== 'function') {
-        setDbg('element not ready/on missing');
+        setStatus({ webview: 'error' });
+        logWarn('electrobun-webview element is not ready');
         return;
       }
 
-      const injectAutologin = async () => {
+      let autologinAttempted = false;
+      let autologinDone = false;
+
+      const injectAutologin = async (reason) => {
+        if (autologinDone) return;
         try {
           const creds = await window.electronAPI?.getCredentials?.();
-          if (!creds?.username || !creds?.password) return;
+          if (!creds?.username || !creds?.password) {
+            setStatus({ autologin: 'no-cred' });
+            return;
+          }
 
-          const u = JSON.stringify(creds.username);
-          const p = JSON.stringify(creds.password);
+          autologinAttempted = true;
+          setStatus({ autologin: `try:${reason}` });
+
           const script = `
             (async function() {
-              function waitForElement(selector, timeout = 15000) {
-                return new Promise((resolve, reject) => {
-                  const initial = document.querySelector(selector);
-                  if (initial) return resolve(initial);
-                  const observer = new MutationObserver(() => {
-                    const found = document.querySelector(selector);
-                    if (found) { observer.disconnect(); resolve(found); }
-                  });
-                  observer.observe(document.body, { childList: true, subtree: true });
-                  setTimeout(() => { observer.disconnect(); reject(new Error('timeout')); }, timeout);
-                });
+              const selectors = {
+                user: ['input[name="login"]', 'input[name="username"]', '#login', '#username'],
+                pass: ['input[name="password"]', '#password', 'input[type="password"]'],
+                submit: ['#loginButton', 'button[type="submit"]', 'button[name="login"]', '.login-button']
+              };
+
+              const pick = (arr) => arr.map((s) => document.querySelector(s)).find(Boolean) || null;
+              const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+              const setNativeValue = (el, value) => {
+                const d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+                if (d && d.set) d.set.call(el, value); else el.value = value;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+              };
+
+              for (let i = 0; i < 20; i++) {
+                const user = pick(selectors.user);
+                const pass = pick(selectors.pass);
+                const submit = pick(selectors.submit);
+
+                if (user && pass && submit) {
+                  setNativeValue(user, ${JSON.stringify(creds.username)});
+                  setNativeValue(pass, ${JSON.stringify(creds.password)});
+                  await sleep(120);
+                  submit.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                  submit.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                  submit.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                  return { ok: true, reason: 'submitted' };
+                }
+                await sleep(250);
               }
-              try {
-                const loginButton = await waitForElement('#loginButton');
-                const usernameField = document.querySelector('input[name="login"]');
-                const passwordField = document.querySelector('input[name="password"]');
-                if (!usernameField || !passwordField) return;
-                const setNativeValue = (el, value) => {
-                  const d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-                  if (d && d.set) d.set.call(el, value); else el.value = value;
-                };
-                setNativeValue(usernameField, ${u});
-                usernameField.dispatchEvent(new Event('input', { bubbles: true }));
-                usernameField.dispatchEvent(new Event('change', { bubbles: true }));
-                setNativeValue(passwordField, ${p});
-                passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-                passwordField.dispatchEvent(new Event('change', { bubbles: true }));
-                await new Promise(r => setTimeout(r, 150));
-                loginButton.click();
-              } catch (err) {
-                console.error('autologin in webview failed', err);
-              }
+
+              return { ok: false, reason: 'login-form-not-found' };
             })();`;
 
-          if (typeof wv.executeJavascript === 'function') {
-            wv.executeJavascript(script);
-            console.log('[wv] autologin script injected');
+          if (typeof wv.executeJavascript !== 'function') {
+            setStatus({ autologin: 'unsupported' });
+            return;
+          }
+
+          const result = await wv.executeJavascript(script);
+          if (result?.ok) {
+            autologinDone = true;
+            setStatus({ autologin: 'submitted' });
+          } else {
+            setStatus({ autologin: result?.reason || 'skip' });
           }
         } catch (err) {
-          console.error('[wv] autologin init failed', err);
+          setStatus({ autologin: 'error' });
+          logWarn('autologin injection failed', err);
         }
       };
 
-      wv.on('did-start-loading', () => { console.log('[wv] did-start-loading'); setDbg('did-start-loading'); });
-      wv.on('did-stop-loading', () => { console.log('[wv] did-stop-loading'); setDbg('did-stop-loading'); });
-      wv.on('dom-ready', async (e) => {
-        console.log('[wv] dom-ready', e?.detail ?? '');
-        setDbg('dom-ready');
-        await injectAutologin();
+      const handleReady = async (reason) => {
+        setStatus({ webview: reason });
+        focusWebview();
+        await injectAutologin(reason);
+      };
+
+      wv.on('did-start-loading', () => setStatus({ webview: 'loading' }));
+      wv.on('dom-ready', () => void handleReady('dom-ready'));
+      wv.on('did-stop-loading', () => {
+        setStatus({ webview: 'ready' });
+        focusWebview();
       });
-      wv.on('did-navigate', async () => {
-        // повторная попытка после редиректов /sign-in
-        await injectAutologin();
+      wv.on('did-navigate', () => void handleReady('navigate'));
+      wv.on('did-fail-load', (e) => {
+        setStatus({ webview: 'fail-load' });
+        logWarn('webview load failed', e?.detail ?? e);
       });
-      wv.on('did-fail-load', (e) => { console.error('[wv] did-fail-load:', e?.detail ?? e); setDbg('did-fail-load'); });
-      wv.on('console-message', (e) => console.log('[wv console]:', e?.detail ?? e));
+
+      wv.addEventListener('mousedown', focusWebview, true);
+      wv.addEventListener('mouseenter', focusWebview, true);
+
+      setTimeout(() => {
+        if (!autologinAttempted) {
+          void injectAutologin('timeout');
+        }
+      }, 2500);
     }
 
     setupWebviewAutomation();
-    setTimeout(() => {
-      if (customElements.get('electrobun-webview')) return;
-      setDbg('custom element not registered');
-    }, 2000);
 
     const applySystemTheme = () => {
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

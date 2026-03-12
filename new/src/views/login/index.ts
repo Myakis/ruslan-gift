@@ -18,4 +18,3 @@ const electrobun = new Electrobun.Electroview({ rpc });
   login: (credentials: { username: string; password: string }) => electrobun.rpc!.request.login(credentials),
 };
 
-console.log("[login-view] rpc bridge ready");

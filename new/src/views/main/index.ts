@@ -20,4 +20,3 @@ const electrobun = new Electrobun.Electroview({ rpc });
   getCredentials: () => electrobun.rpc!.request.getCredentials({}),
 };
 
-console.log("[main-view] rpc bridge ready");

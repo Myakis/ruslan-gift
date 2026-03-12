@@ -14,16 +14,12 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
   handlers: {
     requests: {
       login: async ({ username, password }) => {
-        console.log("[rpc] login request received");
         await store.setCredentials({ username, password });
-        console.log("[rpc] credentials stored, opening main window");
         openMainWindow();
-        // Небольшая задержка, чтобы избежать гонки "нет открытых окон" при переключении login -> main
         setTimeout(() => {
           if (loginWindow) {
             loginWindow.close();
             loginWindow = null;
-            console.log("[rpc] login window closed");
           }
         }, 120);
         return { success: true };
@@ -89,45 +85,8 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
   },
 });
 
-function autologinScript(username: string, password: string) {
-  return `
-  (async function() {
-    function waitForElement(selector, timeout = 15000) {
-      return new Promise((resolve, reject) => {
-        const initial = document.querySelector(selector);
-        if (initial) return resolve(initial);
-        const observer = new MutationObserver(() => {
-          const found = document.querySelector(selector);
-          if (found) {
-            observer.disconnect();
-            resolve(found);
-          }
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-        setTimeout(() => { observer.disconnect(); reject(new Error('timeout')); }, timeout);
-      });
-    }
-
-    try {
-      const loginButton = await waitForElement('#loginButton');
-      const usernameField = document.querySelector('input[name="login"]');
-      const passwordField = document.querySelector('input[name="password"]');
-      if (!usernameField || !passwordField) return;
-      const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-      setValue.call(usernameField, ${JSON.stringify(username)});
-      usernameField.dispatchEvent(new Event('input', { bubbles: true }));
-      setValue.call(passwordField, ${JSON.stringify(password)});
-      passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-      loginButton.click();
-    } catch (e) {
-      console.error('auto login failed', e);
-    }
-  })();`;
-}
-
 function openLoginWindow() {
   if (loginWindow) return loginWindow;
-  console.log("[window] opening login window");
   loginWindow = new BrowserWindow({
     title: "Wplan Auto - Login",
     url: "views://login/index.html",
@@ -151,7 +110,6 @@ function openSettingsWindow() {
 
 function openMainWindow() {
   if (mainWindow) return mainWindow.focus();
-  console.log("[window] opening main window");
   mainWindow = new BrowserWindow({
     title: "Wplan Auto",
     url: "views://main/index.html",
@@ -167,6 +125,10 @@ function openMainWindow() {
     mainWindow = null;
     wplanView = null;
   });
+
+  setTimeout(() => {
+    mainWindow?.focus();
+  }, 50);
 }
 
 async function bootstrap() {
@@ -186,14 +148,12 @@ async function bootstrap() {
 
   const credentials = store.getCredentials();
   if (credentials?.username && credentials?.password) {
-    console.log("[bootstrap] credentials found, going to main window");
     openMainWindow();
   } else {
-    console.log("[bootstrap] credentials not found, going to login window");
     openLoginWindow();
   }
 
-  console.log("Wplan ElectroBun started in", Utils.paths.userData);
+  console.log("[runtime] started", Utils.paths.userData);
 }
 
 void bootstrap();
