@@ -1,13 +1,14 @@
 import { ApplicationMenu, BrowserView, BrowserWindow, Utils } from "electrobun/bun";
 import type { WplanRPC } from "../shared/rpc";
 import { AppStore } from "../core/store";
-import { getButtonState } from "../core/scheduler";
+import { getButtonState, setupScheduler } from "../core/scheduler";
 import { isNotificationsSupported } from "../core/notifications";
 
 const store = new AppStore();
 let loginWindow: BrowserWindow | null = null;
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
+let wplanView: BrowserView | null = null;
 
 const rpc = BrowserView.defineRPC<WplanRPC>({
   handlers: {
@@ -27,14 +28,14 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
       getSettings: () => store.getSettings(),
       saveSettings: async (settings) => {
         await store.setSettings(settings);
-        if (mainWindow) setupScheduler(mainWindow.webview, store.getSettings());
+        if (wplanView) setupScheduler(wplanView, store.getSettings());
         settingsWindow?.close();
         settingsWindow = null;
         return { success: true };
       },
       getButtonState: async () => {
-        if (!mainWindow) return null;
-        return getButtonState(mainWindow.webview);
+        if (!wplanView) return null;
+        return getButtonState(wplanView);
       },
       getNotificationPermissionStatus: () => isNotificationsSupported(),
       getSessionState: () => ({
@@ -53,17 +54,19 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
       },
       reloadWplan: () => {
         try {
-          if ((mainWindow as any)?.webview && typeof (mainWindow as any).webview.reload === 'function') {
-            (mainWindow as any).webview.reload();
+          if (wplanView && typeof (wplanView as any).reload === 'function') {
+            (wplanView as any).reload();
+          } else if (wplanView && typeof (wplanView as any).loadURL === 'function') {
+            (wplanView as any).loadURL('https://wplan.office.lan/');
           } else {
-            console.warn('[rpc] reloadWplan skipped: mainWindow.webview.reload is unavailable');
+            console.warn('[rpc] reloadWplan skipped: wplanView is unavailable');
           }
         } catch (e) {
           console.error('[rpc] reloadWplan error:', e);
         }
       },
       typeInDebugger: ({ text }) => {
-        void mainWindow?.webview.executeJavascript(`
+        void wplanView?.executeJavascript(`
           (function(){
             const el = document.activeElement;
             if (el && ('value' in el)) {
@@ -81,6 +84,42 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
     },
   },
 });
+
+function autologinScript(username: string, password: string) {
+  return `
+  (async function() {
+    function waitForElement(selector, timeout = 15000) {
+      return new Promise((resolve, reject) => {
+        const initial = document.querySelector(selector);
+        if (initial) return resolve(initial);
+        const observer = new MutationObserver(() => {
+          const found = document.querySelector(selector);
+          if (found) {
+            observer.disconnect();
+            resolve(found);
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        setTimeout(() => { observer.disconnect(); reject(new Error('timeout')); }, timeout);
+      });
+    }
+
+    try {
+      const loginButton = await waitForElement('#loginButton');
+      const usernameField = document.querySelector('input[name="login"]');
+      const passwordField = document.querySelector('input[name="password"]');
+      if (!usernameField || !passwordField) return;
+      const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setValue.call(usernameField, ${JSON.stringify(username)});
+      usernameField.dispatchEvent(new Event('input', { bubbles: true }));
+      setValue.call(passwordField, ${JSON.stringify(password)});
+      passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+      loginButton.click();
+    } catch (e) {
+      console.error('auto login failed', e);
+    }
+  })();`;
+}
 
 function openLoginWindow() {
   if (loginWindow) return loginWindow;
@@ -116,12 +155,26 @@ function openMainWindow() {
     frame: { width: 1200, height: 800, x: 120, y: 80 },
   });
 
-  // В ElectroBun основной UI рендерится в views://main/index.html.
-  // Контент Wplan загружается внутри <webview> тега в main HTML.
-  // Не подменяем корневой webview окна через mainWindow.webview.loadURL(...),
-  // иначе views-страница затирается и автологин ломается.
+  // Отдельный BrowserView для рабочего сайта (как в исходном Electron-проекте)
+  wplanView = new BrowserView({
+    url: 'https://wplan.office.lan/',
+    frame: { x: 0, y: 50, width: 1200, height: 750 },
+  });
 
-  mainWindow.on("close", () => (mainWindow = null));
+  const credentials = store.getCredentials();
+  if (credentials) {
+    wplanView.on('dom-ready', () => {
+      console.log('[webview] dom-ready, running autologin script');
+      void wplanView?.executeJavascript(autologinScript(credentials.username, credentials.password));
+    });
+  }
+
+  setupScheduler(wplanView, store.getSettings());
+
+  mainWindow.on("close", () => {
+    mainWindow = null;
+    wplanView = null;
+  });
 }
 
 async function bootstrap() {
