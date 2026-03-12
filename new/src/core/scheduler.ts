@@ -31,8 +31,13 @@ function clearTimers() {
 
 export async function getButtonState(view: BrowserView): Promise<string | null> {
   try {
+    // Быстрая синхронная проверка без долгого ожидания,
+    // чтобы не упираться в timeout RPC-ответа.
     return await view.rpc.request.evaluateJavascriptWithResponse({
-      script: `${waitForElementScript}; (async()=>{ try { const el = await waitForElement('#startEndWorkButton', 7000); return el?.innerText ?? null; } catch { return null; } })();`,
+      script: `(() => {
+        const el = document.querySelector('#startEndWorkButton');
+        return el ? (el.innerText || '').trim() : null;
+      })();`,
     });
   } catch {
     return null;
