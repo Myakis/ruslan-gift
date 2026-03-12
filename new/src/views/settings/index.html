@@ -298,6 +298,7 @@
 
       const timeEl = document.getElementById('current-time');
 
+      let lastStatusErrorLog = 0;
       async function updateTimers() {
         const now = new Date();
         timeEl.textContent = now.toLocaleTimeString();
@@ -336,13 +337,17 @@
             workStatusTextEl.textContent = 'Статус неизвестен';
           }
         } catch (error) {
-          console.error('Ошибка при получении статуса:', error);
+          // Не спамим консоль каждую секунду одинаковой ошибкой
+          if (Date.now() - lastStatusErrorLog > 10000) {
+            console.error('Ошибка при получении статуса:', error);
+            lastStatusErrorLog = Date.now();
+          }
           remainingTimeEl.textContent = '--:--:--';
           workStatusTextEl.textContent = 'Ошибка статуса';
         }
       }
 
-      setInterval(updateTimers, 1000);
+      setInterval(updateTimers, 3000);
       updateTimers();
 
       const applySystemTheme = () => {

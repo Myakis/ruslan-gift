@@ -31,14 +31,14 @@ function clearTimers() {
 
 export async function getButtonState(view: BrowserView): Promise<string | null> {
   try {
-    // Быстрая синхронная проверка без долгого ожидания,
-    // чтобы не упираться в timeout RPC-ответа.
-    return await view.rpc.request.evaluateJavascriptWithResponse({
-      script: `(() => {
-        const el = document.querySelector('#startEndWorkButton');
-        return el ? (el.innerText || '').trim() : null;
-      })();`,
-    });
+    // Поведение как в old Electron: прямой executeJavascript без внутреннего RPC-request timeout.
+    const jsPromise = view.executeJavascript(`(() => {
+      const el = document.querySelector('#startEndWorkButton');
+      return el ? (el.innerText || '').trim() : null;
+    })();`);
+
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 900));
+    return await Promise.race([jsPromise as Promise<string | null>, timeoutPromise]);
   } catch {
     return null;
   }
