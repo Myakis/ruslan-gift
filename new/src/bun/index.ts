@@ -1,7 +1,7 @@
 import { ApplicationMenu, BrowserView, BrowserWindow, Utils } from "electrobun/bun";
 import type { WplanRPC } from "../shared/rpc";
 import { AppStore } from "../core/store";
-import { getButtonState, setupScheduler } from "../core/scheduler";
+import { getButtonState } from "../core/scheduler";
 import { isNotificationsSupported } from "../core/notifications";
 
 const store = new AppStore();
@@ -72,40 +72,6 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
   },
 });
 
-function autologinScript(username: string, password: string) {
-  return `
-  (async function() {
-    const waitForElement = (selector, timeout = 15000) => new Promise((resolve, reject) => {
-      const initial = document.querySelector(selector);
-      if (initial) return resolve(initial);
-      const observer = new MutationObserver(() => {
-        const found = document.querySelector(selector);
-        if (found) {
-          observer.disconnect();
-          resolve(found);
-        }
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-      setTimeout(() => { observer.disconnect(); reject(new Error('timeout')); }, timeout);
-    });
-
-    try {
-      const loginButton = await waitForElement('#loginButton');
-      const usernameField = document.querySelector('input[name="login"]');
-      const passwordField = document.querySelector('input[name="password"]');
-      if (!usernameField || !passwordField) return;
-      const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-      setValue.call(usernameField, ${JSON.stringify(username)});
-      usernameField.dispatchEvent(new Event('input', { bubbles: true }));
-      setValue.call(passwordField, ${JSON.stringify(password)});
-      passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-      loginButton.click();
-    } catch (e) {
-      console.error('auto login failed', e);
-    }
-  })();`;
-}
-
 function openLoginWindow() {
   if (loginWindow) return loginWindow;
   console.log("[window] opening login window");
@@ -140,17 +106,11 @@ function openMainWindow() {
     frame: { width: 1200, height: 800, x: 120, y: 80 },
   });
 
-  mainWindow.webview.loadURL("https://wplan.office.lan/");
+  // В ElectroBun основной UI рендерится в views://main/index.html.
+  // Контент Wplan загружается внутри <webview> тега в main HTML.
+  // Не подменяем корневой webview окна через mainWindow.webview.loadURL(...),
+  // иначе views-страница затирается и автологин ломается.
 
-  const credentials = store.getCredentials();
-  if (credentials) {
-    mainWindow.webview.on("dom-ready", () => {
-      console.log("[webview] dom-ready, running autologin script");
-      void mainWindow?.webview.executeJavascript(autologinScript(credentials.username, credentials.password));
-    });
-  }
-
-  setupScheduler(mainWindow.webview, store.getSettings());
   mainWindow.on("close", () => (mainWindow = null));
 }
 
