@@ -126,7 +126,7 @@ async function tryAutoLogin(view: BrowserView) {
   const result = await view.rpc.request.evaluateJavascriptWithResponse({
     script: `
       (async function() {
-        function waitForElement(selector) {
+        function waitForElement(selector, timeoutMs = 2500) {
           return new Promise((resolve) => {
             const found = document.querySelector(selector);
             if (found) return resolve(found);
@@ -138,6 +138,10 @@ async function tryAutoLogin(view: BrowserView) {
               }
             });
             observer.observe(document.body, { childList: true, subtree: true });
+            setTimeout(() => {
+              observer.disconnect();
+              resolve(null);
+            }, timeoutMs);
           });
         }
 
@@ -211,9 +215,13 @@ function openMainWindow() {
     console.log(`[autologin] attempt #${attemptNo}`);
     setTimeout(async () => {
       if (!wplanView || autoLoginCompleted) return;
-      const res = await tryAutoLogin(wplanView);
-      if (res?.submitted) {
-        autoLoginCompleted = true;
+      try {
+        const res = await tryAutoLogin(wplanView);
+        if (res?.submitted) {
+          autoLoginCompleted = true;
+        }
+      } catch (e) {
+        console.warn('[autologin] attempt failed:', e);
       }
     }, 300);
   };
