@@ -117,92 +117,79 @@
       window.electronAPI?.logout?.();
     });
 
-    const wv = document.getElementById('wplan-webview');
-    console.log('[wv] exists:', !!wv);
-    if (wv) {
-      try {
-        console.log('[wv] initial url:', wv.getURL ? wv.getURL() : '(getURL unavailable)');
-      } catch (e) {
-        console.warn('[wv] getURL error:', e);
-      }
+    async function setupWebviewAutomation() {
+      await customElements.whenDefined('electrobun-webview');
+      const wv = document.getElementById('wplan-webview');
+      console.log('[wv] exists:', !!wv);
+      if (!wv || typeof wv.on !== 'function') return;
 
-      if (typeof wv.on === 'function') {
-        wv.on('did-start-loading', () => console.log('[wv] did-start-loading'));
-        wv.on('did-stop-loading', () => console.log('[wv] did-stop-loading'));
-        wv.on('dom-ready', async (e) => {
-          console.log('[wv] dom-ready', e?.detail ?? '');
-          try {
-            const creds = await window.electronAPI?.getCredentials?.();
-            if (!creds?.username || !creds?.password) return;
+      const injectAutologin = async () => {
+        try {
+          const creds = await window.electronAPI?.getCredentials?.();
+          if (!creds?.username || !creds?.password) return;
 
-            const u = JSON.stringify(creds.username);
-            const p = JSON.stringify(creds.password);
-            const script = `
-              (async function() {
-                function waitForElement(selector, timeout = 12000) {
-                  return new Promise((resolve, reject) => {
-                    const initial = document.querySelector(selector);
-                    if (initial) return resolve(initial);
-                    const observer = new MutationObserver(() => {
-                      const found = document.querySelector(selector);
-                      if (found) { observer.disconnect(); resolve(found); }
-                    });
-                    observer.observe(document.body, { childList: true, subtree: true });
-                    setTimeout(() => { observer.disconnect(); reject(new Error('timeout')); }, timeout);
+          const u = JSON.stringify(creds.username);
+          const p = JSON.stringify(creds.password);
+          const script = `
+            (async function() {
+              function waitForElement(selector, timeout = 15000) {
+                return new Promise((resolve, reject) => {
+                  const initial = document.querySelector(selector);
+                  if (initial) return resolve(initial);
+                  const observer = new MutationObserver(() => {
+                    const found = document.querySelector(selector);
+                    if (found) { observer.disconnect(); resolve(found); }
                   });
-                }
-                try {
-                  const loginButton = await waitForElement('#loginButton');
-                  const usernameField = document.querySelector('input[name="login"]');
-                  const passwordField = document.querySelector('input[name="password"]');
-                  if (!usernameField || !passwordField) return;
+                  observer.observe(document.body, { childList: true, subtree: true });
+                  setTimeout(() => { observer.disconnect(); reject(new Error('timeout')); }, timeout);
+                });
+              }
+              try {
+                const loginButton = await waitForElement('#loginButton');
+                const usernameField = document.querySelector('input[name="login"]');
+                const passwordField = document.querySelector('input[name="password"]');
+                if (!usernameField || !passwordField) return;
+                const setNativeValue = (el, value) => {
+                  const d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+                  if (d && d.set) d.set.call(el, value); else el.value = value;
+                };
+                setNativeValue(usernameField, ${u});
+                usernameField.dispatchEvent(new Event('input', { bubbles: true }));
+                usernameField.dispatchEvent(new Event('change', { bubbles: true }));
+                setNativeValue(passwordField, ${p});
+                passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+                passwordField.dispatchEvent(new Event('change', { bubbles: true }));
+                await new Promise(r => setTimeout(r, 150));
+                loginButton.click();
+              } catch (err) {
+                console.error('autologin in webview failed', err);
+              }
+            })();`;
 
-                  const setNativeValue = (el, value) => {
-                    const { set } = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value') || {};
-                    if (set) set.call(el, value);
-                    else el.value = value;
-                  };
-
-                  setNativeValue(usernameField, ${u});
-                  usernameField.dispatchEvent(new Event('input', { bubbles: true }));
-                  usernameField.dispatchEvent(new Event('change', { bubbles: true }));
-                  usernameField.dispatchEvent(new Event('blur', { bubbles: true }));
-
-                  setNativeValue(passwordField, ${p});
-                  passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-                  passwordField.dispatchEvent(new Event('change', { bubbles: true }));
-                  passwordField.dispatchEvent(new Event('blur', { bubbles: true }));
-
-                  // Небольшая пауза, чтобы React/antd успели обновить состояние формы
-                  await new Promise(r => setTimeout(r, 120));
-
-                  loginButton.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-                  loginButton.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-                  loginButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-                  // Фолбэк: попытка сабмита формы Enter-ом
-                  const form = document.querySelector('form#basic');
-                  if (form) {
-                    form.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-                    form.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
-                  }
-                } catch (err) {
-                  console.error('autologin in webview failed', err);
-                }
-              })();`;
-
-            if (typeof wv.executeJavascript === 'function') {
-              wv.executeJavascript(script);
-              console.log('[wv] autologin script injected');
-            }
-          } catch (err) {
-            console.error('[wv] autologin init failed', err);
+          if (typeof wv.executeJavascript === 'function') {
+            wv.executeJavascript(script);
+            console.log('[wv] autologin script injected');
           }
-        });
-        wv.on('did-fail-load', (e) => console.error('[wv] did-fail-load:', e?.detail ?? e));
-        wv.on('console-message', (e) => console.log('[wv console]:', e?.detail ?? e));
-      }
+        } catch (err) {
+          console.error('[wv] autologin init failed', err);
+        }
+      };
+
+      wv.on('did-start-loading', () => console.log('[wv] did-start-loading'));
+      wv.on('did-stop-loading', () => console.log('[wv] did-stop-loading'));
+      wv.on('dom-ready', async (e) => {
+        console.log('[wv] dom-ready', e?.detail ?? '');
+        await injectAutologin();
+      });
+      wv.on('did-navigate', async () => {
+        // повторная попытка после редиректов /sign-in
+        await injectAutologin();
+      });
+      wv.on('did-fail-load', (e) => console.error('[wv] did-fail-load:', e?.detail ?? e));
+      wv.on('console-message', (e) => console.log('[wv console]:', e?.detail ?? e));
     }
+
+    setupWebviewAutomation();
 
     const applySystemTheme = () => {
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
