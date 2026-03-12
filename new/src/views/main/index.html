@@ -193,6 +193,18 @@
                 if (d && d.set) d.set.call(el, value); else el.value = value;
                 el.dispatchEvent(new Event('input', { bubbles: true }));
                 el.dispatchEvent(new Event('change', { bubbles: true }));
+              };
+
+              const typeLikeHuman = async (el, text) => {
+                el.focus();
+                setNativeValue(el, '');
+                for (const ch of text) {
+                  el.dispatchEvent(new KeyboardEvent('keydown', { key: ch, bubbles: true }));
+                  const current = el.value || '';
+                  setNativeValue(el, current + ch);
+                  el.dispatchEvent(new KeyboardEvent('keyup', { key: ch, bubbles: true }));
+                  await sleep(18);
+                }
                 el.dispatchEvent(new Event('blur', { bubbles: true }));
               };
 
@@ -204,12 +216,18 @@
                 const submit = pick(selectors.submit);
 
                 if (user && pass && submit) {
-                  setNativeValue(user, ${JSON.stringify(creds.username)});
-                  setNativeValue(pass, ${JSON.stringify(creds.password)});
+                  await typeLikeHuman(user, ${JSON.stringify(creds.username)});
+                  await typeLikeHuman(pass, ${JSON.stringify(creds.password)});
 
+                  submit.focus();
                   submit.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
                   submit.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
                   submit.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+                  const form = document.querySelector('form#basic');
+                  if (form && typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                  }
 
                   window.__wplanAutoLoginDone = true;
                   clearInterval(timer);
