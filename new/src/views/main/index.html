@@ -156,12 +156,36 @@
                   const usernameField = document.querySelector('input[name="login"]');
                   const passwordField = document.querySelector('input[name="password"]');
                   if (!usernameField || !passwordField) return;
-                  const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-                  setValue.call(usernameField, ${u});
+
+                  const setNativeValue = (el, value) => {
+                    const { set } = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value') || {};
+                    if (set) set.call(el, value);
+                    else el.value = value;
+                  };
+
+                  setNativeValue(usernameField, ${u});
                   usernameField.dispatchEvent(new Event('input', { bubbles: true }));
-                  setValue.call(passwordField, ${p});
+                  usernameField.dispatchEvent(new Event('change', { bubbles: true }));
+                  usernameField.dispatchEvent(new Event('blur', { bubbles: true }));
+
+                  setNativeValue(passwordField, ${p});
                   passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-                  loginButton.click();
+                  passwordField.dispatchEvent(new Event('change', { bubbles: true }));
+                  passwordField.dispatchEvent(new Event('blur', { bubbles: true }));
+
+                  // Небольшая пауза, чтобы React/antd успели обновить состояние формы
+                  await new Promise(r => setTimeout(r, 120));
+
+                  loginButton.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                  loginButton.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                  loginButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+                  // Фолбэк: попытка сабмита формы Enter-ом
+                  const form = document.querySelector('form#basic');
+                  if (form) {
+                    form.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+                    form.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+                  }
                 } catch (err) {
                   console.error('autologin in webview failed', err);
                 }
