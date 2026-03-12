@@ -95,9 +95,11 @@
 
     const logWarn = (...args) => console.warn('[main-view]', ...args);
 
+    const getWv = () => document.getElementById('wplan-webview') || document.querySelector('electrobun-webview');
+
     document.getElementById('settings-btn').addEventListener('click', () => window.electronAPI?.openSettings?.());
     document.getElementById('reload-btn').addEventListener('click', () => {
-      const wv = document.getElementById('wplan-webview');
+      const wv = getWv();
       if (wv && typeof wv.reload === 'function') {
         wv.reload();
       } else {
@@ -107,7 +109,7 @@
     document.getElementById('logout-btn').addEventListener('click', () => window.electronAPI?.logout?.());
 
     const focusWebview = () => {
-      const wv = document.getElementById('wplan-webview');
+      const wv = getWv();
       if (!wv) return;
       if (typeof wv.focus === 'function') wv.focus();
       requestAnimationFrame(() => {
@@ -123,7 +125,7 @@
       }
 
       await customElements.whenDefined('electrobun-webview');
-      const wv = document.getElementById('wplan-webview');
+      const wv = getWv();
       if (!wv || typeof wv.on !== 'function') {
         setStatus({ webview: 'error' });
         logWarn('electrobun-webview element is not ready');
