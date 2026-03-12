@@ -119,7 +119,7 @@ async function tryAutoLogin(view: BrowserView) {
 
   if (!credentials?.username || !credentials?.password) {
     console.log("[autologin] result state: no-credentials");
-    return;
+    return { submitted: false, state: 'no-credentials' };
   }
 
   console.log("[autologin] injection attempted");
@@ -175,6 +175,7 @@ async function tryAutoLogin(view: BrowserView) {
     console.log("[autologin] submit fired");
   }
   console.log("[autologin] result state:", result?.state ?? "unknown");
+  return result;
 }
 
 function openMainWindow() {
@@ -200,17 +201,31 @@ function openMainWindow() {
     },
   });
 
-  let isAutoLoginSent = false;
+  let autoLoginCompleted = false;
+  let autoLoginAttempts = 0;
+
+  const scheduleAutoLogin = () => {
+    if (!wplanView || autoLoginCompleted || autoLoginAttempts >= 8) return;
+    autoLoginAttempts += 1;
+    const attemptNo = autoLoginAttempts;
+    console.log(`[autologin] attempt #${attemptNo}`);
+    setTimeout(async () => {
+      if (!wplanView || autoLoginCompleted) return;
+      const res = await tryAutoLogin(wplanView);
+      if (res?.submitted) {
+        autoLoginCompleted = true;
+      }
+    }, 300);
+  };
 
   wplanView.on("dom-ready", () => {
     if (!wplanView) return;
-
-    if (!isAutoLoginSent) {
-      isAutoLoginSent = true;
-      void tryAutoLogin(wplanView);
-    }
-
+    scheduleAutoLogin();
     setupScheduler(wplanView, store.getSettings());
+  });
+
+  wplanView.on("did-navigate", () => {
+    scheduleAutoLogin();
   });
 
   mainWindow.on("resize", resizeWplanView);
