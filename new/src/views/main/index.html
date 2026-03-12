@@ -85,7 +85,7 @@
     </header>
 
     <main class="flex-1 bg-[#0b1730]">
-      <webview id="wplan-webview" src="https://wplan.office.lan/" style="width:100%;height:100%;display:block;"></webview>
+      <electrobun-webview id="wplan-webview" src="https://wplan.office.lan/" style="width:100%;height:100%;display:block;"></electrobun-webview>
     </main>
   </div>
 
@@ -125,11 +125,14 @@
       } catch (e) {
         console.warn('[wv] getURL error:', e);
       }
-      wv.addEventListener('did-start-loading', () => console.log('[wv] did-start-loading'));
-      wv.addEventListener('did-stop-loading', () => console.log('[wv] did-stop-loading'));
-      wv.addEventListener('dom-ready', () => console.log('[wv] dom-ready'));
-      wv.addEventListener('did-fail-load', (e) => console.error('[wv] did-fail-load:', e));
-      wv.addEventListener('console-message', (e) => console.log('[wv console]:', e.message));
+
+      if (typeof wv.on === 'function') {
+        wv.on('did-start-loading', () => console.log('[wv] did-start-loading'));
+        wv.on('did-stop-loading', () => console.log('[wv] did-stop-loading'));
+        wv.on('dom-ready', (e) => console.log('[wv] dom-ready', e?.detail ?? ''));
+        wv.on('did-fail-load', (e) => console.error('[wv] did-fail-load:', e?.detail ?? e));
+        wv.on('console-message', (e) => console.log('[wv console]:', e?.detail ?? e));
+      }
     }
 
     const applySystemTheme = () => {
