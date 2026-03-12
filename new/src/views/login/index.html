@@ -132,12 +132,11 @@
         password: passwordInput.value,
       };
       try {
-        const rpc = window.electrobun?.rpc;
-        const legacy = window.electronAPI;
-        const loginFn = rpc?.request?.login || legacy?.login;
+        const loginFn = window.electronAPI?.login;
         if (typeof loginFn !== 'function') {
           throw new Error('RPC bridge not ready');
         }
+        console.log('[login-ui] submit credentials');
         const result = await loginFn(credentials);
         if (!result?.success) {
           errorMessageText.textContent = result?.message || 'Неверные данные для входа';

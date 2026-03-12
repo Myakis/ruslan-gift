@@ -1,4 +1,4 @@
-import { Electroview } from "electrobun/view";
+import Electrobun, { Electroview } from "electrobun/view";
 import type { WplanRPC } from "../../shared/rpc";
 
 const rpc = Electroview.defineRPC<WplanRPC>({
@@ -10,13 +10,13 @@ const rpc = Electroview.defineRPC<WplanRPC>({
   },
 });
 
-const view = new Electroview({ rpc });
+const electrobun = new Electrobun.Electroview({ rpc });
 
 (window as any).electronAPI = {
-  openSettings: () => view.rpc.bun.send.openSettings({}),
-  logout: () => view.rpc.bun.send.logout({}),
-  reloadWplan: () => view.rpc.bun.send.reloadWplan({}),
-  typeInDebugger: (text: string) => view.rpc.bun.send.typeInDebugger({ text }),
+  openSettings: () => electrobun.rpc!.send.openSettings({}),
+  logout: () => electrobun.rpc!.send.logout({}),
+  reloadWplan: () => electrobun.rpc!.send.reloadWplan({}),
+  typeInDebugger: (text: string) => electrobun.rpc!.send.typeInDebugger({ text }),
 };
 
 console.log("[main-view] rpc bridge ready");

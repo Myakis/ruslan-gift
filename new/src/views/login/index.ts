@@ -1,4 +1,4 @@
-import { Electroview } from "electrobun/view";
+import Electrobun, { Electroview } from "electrobun/view";
 import type { WplanRPC } from "../../shared/rpc";
 
 const rpc = Electroview.defineRPC<WplanRPC>({
@@ -12,10 +12,10 @@ const rpc = Electroview.defineRPC<WplanRPC>({
   },
 });
 
-const view = new Electroview({ rpc });
+const electrobun = new Electrobun.Electroview({ rpc });
 
 (window as any).electronAPI = {
-  login: (credentials: { username: string; password: string }) => view.rpc.bun.request.login(credentials),
+  login: (credentials: { username: string; password: string }) => electrobun.rpc!.request.login(credentials),
 };
 
 console.log("[login-view] rpc bridge ready");

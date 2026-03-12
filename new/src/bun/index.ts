@@ -13,10 +13,15 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
   handlers: {
     requests: {
       login: async ({ username, password }) => {
+        console.log("[rpc] login request received");
         await store.setCredentials({ username, password });
+        console.log("[rpc] credentials stored, opening main window");
         openMainWindow();
-        loginWindow?.close();
-        loginWindow = null;
+        if (loginWindow) {
+          loginWindow.close();
+          loginWindow = null;
+          console.log("[rpc] login window closed");
+        }
         return { success: true };
       },
       getSettings: () => store.getSettings(),
@@ -103,6 +108,7 @@ function autologinScript(username: string, password: string) {
 
 function openLoginWindow() {
   if (loginWindow) return loginWindow;
+  console.log("[window] opening login window");
   loginWindow = new BrowserWindow({
     title: "Wplan Auto - Login",
     url: "views://login/index.html",
@@ -126,6 +132,7 @@ function openSettingsWindow() {
 
 function openMainWindow() {
   if (mainWindow) return mainWindow.focus();
+  console.log("[window] opening main window");
   mainWindow = new BrowserWindow({
     title: "Wplan Auto",
     url: "views://main/index.html",
@@ -138,6 +145,7 @@ function openMainWindow() {
   const credentials = store.getCredentials();
   if (credentials) {
     mainWindow.webview.on("dom-ready", () => {
+      console.log("[webview] dom-ready, running autologin script");
       void mainWindow?.webview.executeJavascript(autologinScript(credentials.username, credentials.password));
     });
   }
@@ -163,8 +171,10 @@ async function bootstrap() {
 
   const credentials = store.getCredentials();
   if (credentials?.username && credentials?.password) {
+    console.log("[bootstrap] credentials found, going to main window");
     openMainWindow();
   } else {
+    console.log("[bootstrap] credentials not found, going to login window");
     openLoginWindow();
   }
 

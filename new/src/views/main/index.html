@@ -98,16 +98,14 @@
 
   <script type="module" src="./index.js"></script>
   <script>
-    const rpc = window.electrobun?.rpc;
-
     document.getElementById('settings-btn').addEventListener('click', () => {
-      rpc?.send?.openSettings?.({});
+      window.electronAPI?.openSettings?.();
     });
     document.getElementById('reload-btn').addEventListener('click', () => {
-      rpc?.send?.reloadWplan?.({});
+      window.electronAPI?.reloadWplan?.();
     });
     document.getElementById('logout-btn').addEventListener('click', () => {
-      rpc?.send?.logout?.({});
+      window.electronAPI?.logout?.();
     });
 
     const applySystemTheme = () => {

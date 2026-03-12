@@ -1,4 +1,4 @@
-import { Electroview } from "electrobun/view";
+import Electrobun, { Electroview } from "electrobun/view";
 import type { Settings, WplanRPC } from "../../shared/rpc";
 
 const rpc = Electroview.defineRPC<WplanRPC>({
@@ -10,13 +10,13 @@ const rpc = Electroview.defineRPC<WplanRPC>({
   },
 });
 
-const view = new Electroview({ rpc });
+const electrobun = new Electrobun.Electroview({ rpc });
 
 (window as any).electronAPI = {
-  getSettings: () => view.rpc.bun.request.getSettings({}),
-  saveSettings: (settings: Settings) => view.rpc.bun.request.saveSettings(settings),
-  getButtonState: () => view.rpc.bun.request.getButtonState({}),
-  getNotificationPermissionStatus: () => view.rpc.bun.request.getNotificationPermissionStatus({}),
+  getSettings: () => electrobun.rpc!.request.getSettings({}),
+  saveSettings: (settings: Settings) => electrobun.rpc!.request.saveSettings(settings),
+  getButtonState: () => electrobun.rpc!.request.getButtonState({}),
+  getNotificationPermissionStatus: () => electrobun.rpc!.request.getNotificationPermissionStatus({}),
 };
 
 console.log("[settings-view] rpc bridge ready");
