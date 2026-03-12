@@ -123,63 +123,56 @@ async function tryAutoLogin(view: BrowserView) {
   }
 
   console.log("[autologin] injection attempted");
-  const result = await view.rpc.request.evaluateJavascriptWithResponse({
-    script: `
-      (async function() {
-        function waitForElement(selector, timeoutMs = 2500) {
-          return new Promise((resolve) => {
-            const found = document.querySelector(selector);
-            if (found) return resolve(found);
-            const observer = new MutationObserver(() => {
-              const el = document.querySelector(selector);
-              if (el) {
-                observer.disconnect();
-                resolve(el);
-              }
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-            setTimeout(() => {
-              observer.disconnect();
-              resolve(null);
-            }, timeoutMs);
-          });
+
+  // Важно: fire-and-forget, чтобы не упираться в RPC timeout при ожидании формы
+  view.executeJavascript(`
+    (function() {
+      if (window.__wplanAutoLoginTimer) return;
+
+      const userValue = ${JSON.stringify(credentials.username)};
+      const passValue = ${JSON.stringify(credentials.password)};
+      const pick = (arr) => arr.map((s) => document.querySelector(s)).find(Boolean) || null;
+      const selectors = {
+        user: ['input[name="login"]', 'input[name="username"]', '#login', '#username'],
+        pass: ['input[name="password"]', '#password', 'input[type="password"]'],
+        submit: ['#loginButton', 'button[type="submit"]', 'button[name="login"]', '.login-button']
+      };
+
+      const setNative = (el, value) => {
+        const d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+        if (d && d.set) d.set.call(el, value); else el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+
+      let tries = 0;
+      window.__wplanAutoLoginTimer = setInterval(() => {
+        tries += 1;
+        const user = pick(selectors.user);
+        const pass = pick(selectors.pass);
+        const submit = pick(selectors.submit);
+
+        if (user && pass && submit) {
+          setNative(user, userValue);
+          setNative(pass, passValue);
+          submit.click();
+          window.__wplanAutoLoginDone = true;
+          clearInterval(window.__wplanAutoLoginTimer);
+          window.__wplanAutoLoginTimer = null;
+          console.log('[autologin] submitted');
+          return;
         }
 
-        try {
-          const loginButton = await waitForElement('#loginButton');
-          const usernameField = document.querySelector('input[name="login"]');
-          const passwordField = document.querySelector('input[name="password"]');
-
-          if (!usernameField || !passwordField || !loginButton) {
-            return { formFound: false, submitted: false, state: 'form-not-found' };
-          }
-
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-          const inputEvent = new Event('input', { bubbles: true });
-
-          nativeInputValueSetter.call(usernameField, ${JSON.stringify(credentials.username)});
-          usernameField.dispatchEvent(inputEvent);
-          await new Promise((r) => setTimeout(r, 100));
-
-          nativeInputValueSetter.call(passwordField, ${JSON.stringify(credentials.password)});
-          passwordField.dispatchEvent(inputEvent);
-          await new Promise((r) => setTimeout(r, 100));
-
-          loginButton.click();
-          return { formFound: true, submitted: true, state: 'submitted' };
-        } catch (e) {
-          return { formFound: false, submitted: false, state: 'error', error: String(e?.message || e) };
+        if (tries >= 30) {
+          clearInterval(window.__wplanAutoLoginTimer);
+          window.__wplanAutoLoginTimer = null;
+          console.log('[autologin] form-not-found');
         }
-      })();
-    `,
-  });
+      }, 400);
+    })();
+  `);
 
-  console.log("[autologin] form", result?.formFound ? "found" : "not found");
-  if (result?.submitted) {
-    console.log("[autologin] submit fired");
-  }
-  console.log("[autologin] result state:", result?.state ?? "unknown");
-  return result;
+  return { submitted: false, state: 'injected' };
 }
 
 function openMainWindow() {
@@ -216,10 +209,9 @@ function openMainWindow() {
     setTimeout(async () => {
       if (!wplanView || autoLoginCompleted) return;
       try {
-        const res = await tryAutoLogin(wplanView);
-        if (res?.submitted) {
-          autoLoginCompleted = true;
-        }
+        await tryAutoLogin(wplanView);
+        // one-shot inject script now contains its own retry loop inside the page
+        autoLoginCompleted = true;
       } catch (e) {
         console.warn('[autologin] attempt failed:', e);
       }
