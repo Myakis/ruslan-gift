@@ -51,7 +51,17 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
         mainWindow = null;
         openLoginWindow();
       },
-      reloadWplan: () => mainWindow?.webview.reload(),
+      reloadWplan: () => {
+        try {
+          if ((mainWindow as any)?.webview && typeof (mainWindow as any).webview.reload === 'function') {
+            (mainWindow as any).webview.reload();
+          } else {
+            console.warn('[rpc] reloadWplan skipped: mainWindow.webview.reload is unavailable');
+          }
+        } catch (e) {
+          console.error('[rpc] reloadWplan error:', e);
+        }
+      },
       typeInDebugger: ({ text }) => {
         void mainWindow?.webview.executeJavascript(`
           (function(){

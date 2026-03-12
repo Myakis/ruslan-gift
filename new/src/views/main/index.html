@@ -106,7 +106,12 @@
       window.electronAPI?.openSettings?.();
     });
     document.getElementById('reload-btn').addEventListener('click', () => {
-      window.electronAPI?.reloadWplan?.();
+      const wv = document.getElementById('wplan-webview');
+      if (wv && typeof wv.reload === 'function') {
+        wv.reload();
+      } else {
+        window.location.reload();
+      }
     });
     document.getElementById('logout-btn').addEventListener('click', () => {
       window.electronAPI?.logout?.();
