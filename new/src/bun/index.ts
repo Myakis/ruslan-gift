@@ -18,11 +18,14 @@ const rpc = BrowserView.defineRPC<WplanRPC>({
         await store.setCredentials({ username, password });
         console.log("[rpc] credentials stored, opening main window");
         openMainWindow();
-        if (loginWindow) {
-          loginWindow.close();
-          loginWindow = null;
-          console.log("[rpc] login window closed");
-        }
+        // Небольшая задержка, чтобы избежать гонки "нет открытых окон" при переключении login -> main
+        setTimeout(() => {
+          if (loginWindow) {
+            loginWindow.close();
+            loginWindow = null;
+            console.log("[rpc] login window closed");
+          }
+        }, 120);
         return { success: true };
       },
       getSettings: () => store.getSettings(),
@@ -155,21 +158,31 @@ function openMainWindow() {
     frame: { width: 1200, height: 800, x: 120, y: 80 },
   });
 
-  // Отдельный BrowserView для рабочего сайта (как в исходном Electron-проекте)
-  wplanView = new BrowserView({
-    url: 'https://wplan.office.lan/',
-    frame: { x: 0, y: 50, width: 1200, height: 750 },
-  });
+  const attachWplanView = () => {
+    if (!mainWindow) return;
+    try {
+      // Отдельный BrowserView для рабочего сайта (как в исходном Electron-проекте)
+      wplanView = new BrowserView({
+        url: 'https://wplan.office.lan/',
+        frame: { x: 0, y: 50, width: 1200, height: 750 },
+      });
 
-  const credentials = store.getCredentials();
-  if (credentials) {
-    wplanView.on('dom-ready', () => {
-      console.log('[webview] dom-ready, running autologin script');
-      void wplanView?.executeJavascript(autologinScript(credentials.username, credentials.password));
-    });
-  }
+      const credentials = store.getCredentials();
+      if (credentials) {
+        wplanView.on('dom-ready', () => {
+          console.log('[webview] dom-ready, running autologin script');
+          void wplanView?.executeJavascript(autologinScript(credentials.username, credentials.password));
+        });
+      }
 
-  setupScheduler(wplanView, store.getSettings());
+      setupScheduler(wplanView, store.getSettings());
+    } catch (e) {
+      console.error('[window] failed to attach BrowserView:', e);
+    }
+  };
+
+  // Делаем attach чуть позже, чтобы окно гарантированно успело инициализироваться
+  setTimeout(attachWplanView, 150);
 
   mainWindow.on("close", () => {
     mainWindow = null;
