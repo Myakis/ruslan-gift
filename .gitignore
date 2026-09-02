@@ -7,7 +7,7 @@
 Package.resolved
 
 # Xcode
-*.xcodeproj/xcuserdata/
-*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
+**/*.xcworkspace/xcuserdata/
 DerivedData/
 *.xcuserstate
