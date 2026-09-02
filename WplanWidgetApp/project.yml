@@ -2,7 +2,7 @@ name: WplanWidgetApp
 options:
   bundleIdPrefix: ru.itmo.wplanwidget
   deploymentTarget:
-    macOS: "13.0"
+    macOS: "14.0"
 
 packages:
   WplanCore:

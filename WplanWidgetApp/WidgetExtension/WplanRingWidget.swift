@@ -50,6 +50,7 @@ struct WplanRingWidgetView: View {
                 .foregroundStyle(.secondary)
         }
         .padding()
+        .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
