@@ -11,6 +11,8 @@ final class MenuBarModel: ObservableObject {
 
     @Published var isLoggedIn = false
     @Published var vpnStatusText = "Проверка…"
+    @Published var buttonStateText: String?
+    @Published var isCheckingButtonState = false
 
     @Published var username = ""
     @Published var password = ""
@@ -64,5 +66,30 @@ final class MenuBarModel: ObservableObject {
     func logout() {
         try? keychain.delete()
         isLoggedIn = false
+    }
+
+    /// Sanity check that the session cookie from `login()` is actually reused —
+    /// this is the thing that decides whether AutoclickScheduler can work at all.
+    func checkButtonState() async {
+        isCheckingButtonState = true
+        defer { isCheckingButtonState = false }
+        do {
+            let state = try await client.fetchButtonState()
+            buttonStateText = state.isStart
+                ? "День не начат (кнопка = «Начать»)"
+                : "День уже идёт (кнопка = «Завершить»)"
+        } catch let error as GraphQLClient.ClientError {
+            switch error {
+            case .invalidResponse:
+                buttonStateText = "Ошибка: неожиданный/пустой ответ сервера"
+            case .http(let status):
+                buttonStateText = "Ошибка: HTTP \(status)"
+            case .graphQL(let messages):
+                buttonStateText = "Ошибка: \(messages.joined(separator: "; "))"
+            }
+        } catch {
+            let nsError = error as NSError
+            buttonStateText = "Ошибка: [\(nsError.domain) \(nsError.code)] \(nsError.localizedDescription)"
+        }
     }
 }

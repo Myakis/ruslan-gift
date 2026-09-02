@@ -17,6 +17,26 @@ struct MenuBarContentView: View {
                 Button("Обновить") {
                     Task { await model.refresh() }
                 }
+
+                Button {
+                    Task { await model.checkButtonState() }
+                } label: {
+                    if model.isCheckingButtonState {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Text("Проверить статус дня")
+                    }
+                }
+                .disabled(model.isCheckingButtonState)
+
+                if let buttonStateText = model.buttonStateText {
+                    Text(buttonStateText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
+
                 Button("Выйти из аккаунта") {
                     model.logout()
                 }

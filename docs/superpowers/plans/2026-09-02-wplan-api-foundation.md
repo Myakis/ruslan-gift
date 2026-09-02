@@ -28,6 +28,8 @@
 
 `Login` and `StartOrFinishDay` response bodies were never captured failing or succeeding in a way that reveals their `data`/`errors` shape beyond the generic GraphQL envelope. This plan treats **HTTP 2xx + no top-level `errors` array** as success for both operations, and a non-empty `errors` array as failure. If Wplan actually signals a wrong password or a rejected click via `data: {..., success: false}` rather than a GraphQL error, this plan's `login`/`startOrFinishDay` will incorrectly report success. Follow-up task (not in this plan): capture one failing-login curl and one already-clicked `StartOrFinishDay` curl, then tighten `WplanClient` accordingly.
 
+**Update (2026-09-02, verified against the real server via the running app):** a successful `Login` response's `data` field is keyed `jwtLogin`, not `login` — `{"data":{"jwtLogin":{"_id","fio","accessToken","login","permissions":{...},"settings":null,"__typename":"CurrentUserModel"}}}`. It includes an `accessToken` (JWT) alongside the usual `Set-Cookie` (`connect.sid1`/`sh.session.id`) — but since our `login()` never parses `data` at all (only checks for a top-level `errors` array), this required no code change, just confirms the lenient success check works against the real server. The failing-login shape is still uncaptured — that part of the limitation stands.
+
 ---
 
 ## File Structure
