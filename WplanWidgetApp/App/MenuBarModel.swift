@@ -46,6 +46,15 @@ final class MenuBarModel: ObservableObject {
             try keychain.save(WplanCredentials(username: username, password: password))
             password = ""
             isLoggedIn = true
+        } catch let error as GraphQLClient.ClientError {
+            switch error {
+            case .invalidResponse:
+                loginErrorMessage = "Не удалось войти: неожиданный/пустой ответ сервера"
+            case .http(let status):
+                loginErrorMessage = "Не удалось войти: HTTP \(status)"
+            case .graphQL(let messages):
+                loginErrorMessage = "Не удалось войти: \(messages.joined(separator: "; "))"
+            }
         } catch {
             let nsError = error as NSError
             loginErrorMessage = "Не удалось войти: [\(nsError.domain) \(nsError.code)] \(nsError.localizedDescription)"
