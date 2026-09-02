@@ -5,7 +5,7 @@ public final class GraphQLClient {
 
     public enum ClientError: Error, Equatable {
         case invalidResponse
-        case http(status: Int)
+        case http(status: Int, body: String)
         case graphQL(messages: [String])
     }
 
@@ -49,7 +49,9 @@ public final class GraphQLClient {
         let request = try makeRequest(for: operation, method: method)
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw ClientError.invalidResponse }
-        guard (200..<300).contains(http.statusCode) else { throw ClientError.http(status: http.statusCode) }
+        guard (200..<300).contains(http.statusCode) else {
+            throw ClientError.http(status: http.statusCode, body: String(data: data, encoding: .utf8) ?? "")
+        }
         return data
     }
 
@@ -81,6 +83,7 @@ public final class GraphQLClient {
             guard let url = components.url else { throw ClientError.invalidResponse }
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue("undefined", forHTTPHeaderField: "x-xsrf-token")
             return request
         }

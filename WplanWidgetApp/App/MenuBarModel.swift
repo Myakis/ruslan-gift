@@ -52,8 +52,8 @@ final class MenuBarModel: ObservableObject {
             switch error {
             case .invalidResponse:
                 loginErrorMessage = "Не удалось войти: неожиданный/пустой ответ сервера"
-            case .http(let status):
-                loginErrorMessage = "Не удалось войти: HTTP \(status)"
+            case .http(let status, let body):
+                loginErrorMessage = "Не удалось войти: HTTP \(status) — \(body)"
             case .graphQL(let messages):
                 loginErrorMessage = "Не удалось войти: \(messages.joined(separator: "; "))"
             }
@@ -82,8 +82,8 @@ final class MenuBarModel: ObservableObject {
             switch error {
             case .invalidResponse:
                 buttonStateText = "Ошибка: неожиданный/пустой ответ сервера"
-            case .http(let status):
-                buttonStateText = "Ошибка: HTTP \(status)"
+            case .http(let status, let body):
+                buttonStateText = "Ошибка: HTTP \(status) — \(body)"
             case .graphQL(let messages):
                 buttonStateText = "Ошибка: \(messages.joined(separator: "; "))"
             }
