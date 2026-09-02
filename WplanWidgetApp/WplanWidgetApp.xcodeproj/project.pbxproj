@@ -1,0 +1,515 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A1277030D0F69F1630A0638 /* WplanRingWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5E55EAC206DC9DB9BE426E /* WplanRingWidget.swift */; };
+		243DB3FA965823291AD3ECBA /* WplanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 67D646690D110BA0C5526944 /* WplanCore */; };
+		28B3DBFE58AB54291B1562F3 /* WplanWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5EC52A855CC5C2C8AA371CA3 /* WplanWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		51B2A436EA0EFB89CB2F8AAF /* MenuBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D385952A9341A65F274CA9F3 /* MenuBarModel.swift */; };
+		5F922094F361F662370B428A /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E08D77F290F16995646B313E /* SwiftUI.framework */; };
+		71DFEE4F42AD764539B8330F /* WplanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 94648182020CF7C4B9B4B526 /* WplanCore */; };
+		84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */; };
+		AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */; };
+		E9E0DE790F5E32A1C145F3C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7197FE8E362B255F06490F7 /* WidgetKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		50817C195621C23D6D217EEF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19BC195304A6C80C3FA432BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 64B2225C95FD2B3EB3B79275;
+			remoteInfo = WplanWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DFB69E590C2285C6398F4E65 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				28B3DBFE58AB54291B1562F3 /* WplanWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		1CC0D7DC0BF1BF554F662C29 /* WplanWidgetApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WplanWidgetApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C5E55EAC206DC9DB9BE426E /* WplanRingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WplanRingWidget.swift; sourceTree = "<group>"; };
+		5EC52A855CC5C2C8AA371CA3 /* WplanWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WplanWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WplanWidgetApp.swift; sourceTree = "<group>"; };
+		7BE6F9AEACAEAD77A5C67EB5 /* WplanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WplanCore; path = ../WplanCore; sourceTree = SOURCE_ROOT; };
+		AC8BF008F89ABEB8B6138E3D /* WplanWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WplanWidgetExtension.entitlements; sourceTree = "<group>"; };
+		BDE7CE3149A4E896C6305635 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D385952A9341A65F274CA9F3 /* MenuBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarModel.swift; sourceTree = "<group>"; };
+		E08D77F290F16995646B313E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		F5127153EBD41C00C8441797 /* WplanWidgetApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WplanWidgetApp.entitlements; sourceTree = "<group>"; };
+		F7197FE8E362B255F06490F7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C5827C0BCFB41161E7C13027 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				243DB3FA965823291AD3ECBA /* WplanCore in Frameworks */,
+				5F922094F361F662370B428A /* SwiftUI.framework in Frameworks */,
+				E9E0DE790F5E32A1C145F3C7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FFF32003C1D6CD346DCF34FA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				71DFEE4F42AD764539B8330F /* WplanCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2EA8B6A2B9F5E64D51624D79 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1CC0D7DC0BF1BF554F662C29 /* WplanWidgetApp.app */,
+				5EC52A855CC5C2C8AA371CA3 /* WplanWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6B37BDCC12848EA768E29364 /* WidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				BDE7CE3149A4E896C6305635 /* Info.plist */,
+				2C5E55EAC206DC9DB9BE426E /* WplanRingWidget.swift */,
+				AC8BF008F89ABEB8B6138E3D /* WplanWidgetExtension.entitlements */,
+			);
+			path = WidgetExtension;
+			sourceTree = "<group>";
+		};
+		9DA796AF3607B40F35CAAC55 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				7BE6F9AEACAEAD77A5C67EB5 /* WplanCore */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		C89AC20474A2159DF0D6F6C7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E08D77F290F16995646B313E /* SwiftUI.framework */,
+				F7197FE8E362B255F06490F7 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CA065E7F339A6CF61C3A9BA7 = {
+			isa = PBXGroup;
+			children = (
+				DCC6AA699110FB562CE68ABD /* App */,
+				9DA796AF3607B40F35CAAC55 /* Packages */,
+				6B37BDCC12848EA768E29364 /* WidgetExtension */,
+				C89AC20474A2159DF0D6F6C7 /* Frameworks */,
+				2EA8B6A2B9F5E64D51624D79 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DCC6AA699110FB562CE68ABD /* App */ = {
+			isa = PBXGroup;
+			children = (
+				08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */,
+				D385952A9341A65F274CA9F3 /* MenuBarModel.swift */,
+				F5127153EBD41C00C8441797 /* WplanWidgetApp.entitlements */,
+				680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		496914F03E38B2CA2B43711F /* WplanWidgetApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 604A100CA20E6672850A0731 /* Build configuration list for PBXNativeTarget "WplanWidgetApp" */;
+			buildPhases = (
+				AECB80AA55811A71098117D1 /* Sources */,
+				FFF32003C1D6CD346DCF34FA /* Frameworks */,
+				DFB69E590C2285C6398F4E65 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BF530955C5FE17EA6A0F15CC /* PBXTargetDependency */,
+			);
+			name = WplanWidgetApp;
+			packageProductDependencies = (
+				94648182020CF7C4B9B4B526 /* WplanCore */,
+			);
+			productName = WplanWidgetApp;
+			productReference = 1CC0D7DC0BF1BF554F662C29 /* WplanWidgetApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		64B2225C95FD2B3EB3B79275 /* WplanWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 754F7FFC2D6817EC24902576 /* Build configuration list for PBXNativeTarget "WplanWidgetExtension" */;
+			buildPhases = (
+				649F554C69271355F9450383 /* Sources */,
+				C5827C0BCFB41161E7C13027 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WplanWidgetExtension;
+			packageProductDependencies = (
+				67D646690D110BA0C5526944 /* WplanCore */,
+			);
+			productName = WplanWidgetExtension;
+			productReference = 5EC52A855CC5C2C8AA371CA3 /* WplanWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		19BC195304A6C80C3FA432BC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					496914F03E38B2CA2B43711F = {
+						ProvisioningStyle = Automatic;
+					};
+					64B2225C95FD2B3EB3B79275 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 4878D72447EC23ADAD20DD4F /* Build configuration list for PBXProject "WplanWidgetApp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = CA065E7F339A6CF61C3A9BA7;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AD8BE70AA6F1F811B7EAD707 /* XCLocalSwiftPackageReference "../WplanCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 2EA8B6A2B9F5E64D51624D79 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				496914F03E38B2CA2B43711F /* WplanWidgetApp */,
+				64B2225C95FD2B3EB3B79275 /* WplanWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		649F554C69271355F9450383 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A1277030D0F69F1630A0638 /* WplanRingWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AECB80AA55811A71098117D1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */,
+				51B2A436EA0EFB89CB2F8AAF /* MenuBarModel.swift in Sources */,
+				84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BF530955C5FE17EA6A0F15CC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 64B2225C95FD2B3EB3B79275 /* WplanWidgetExtension */;
+			targetProxy = 50817C195621C23D6D217EEF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		22B7108756715AAD2136D978 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WidgetExtension/WplanWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WidgetExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget.widget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		56B455181E7F6730FE542AB1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/WplanWidgetApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		8FA068A01B3927E1CAFDC100 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WidgetExtension/WplanWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WidgetExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget.widget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C3D738AA75852F695AFDFFDE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/WplanWidgetApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DCF00A7DC47B1C1595C80DB5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		EB905E62BFF3B0D60D398E04 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4878D72447EC23ADAD20DD4F /* Build configuration list for PBXProject "WplanWidgetApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCF00A7DC47B1C1595C80DB5 /* Debug */,
+				EB905E62BFF3B0D60D398E04 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		604A100CA20E6672850A0731 /* Build configuration list for PBXNativeTarget "WplanWidgetApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3D738AA75852F695AFDFFDE /* Debug */,
+				56B455181E7F6730FE542AB1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		754F7FFC2D6817EC24902576 /* Build configuration list for PBXNativeTarget "WplanWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8FA068A01B3927E1CAFDC100 /* Debug */,
+				22B7108756715AAD2136D978 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AD8BE70AA6F1F811B7EAD707 /* XCLocalSwiftPackageReference "../WplanCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../WplanCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		67D646690D110BA0C5526944 /* WplanCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WplanCore;
+		};
+		94648182020CF7C4B9B4B526 /* WplanCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WplanCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 19BC195304A6C80C3FA432BC /* Project object */;
+}

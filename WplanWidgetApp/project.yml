@@ -1,0 +1,74 @@
+name: WplanWidgetApp
+options:
+  bundleIdPrefix: ru.itmo.wplanwidget
+  deploymentTarget:
+    macOS: "13.0"
+
+packages:
+  WplanCore:
+    path: ../WplanCore
+
+targets:
+  WplanWidgetApp:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ru.itmo.wplanwidget
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        CODE_SIGN_STYLE: Automatic
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ENABLE_HARDENED_RUNTIME: YES
+        SWIFT_VERSION: "5.0"
+    dependencies:
+      - package: WplanCore
+      - target: WplanWidgetExtension
+        embed: true
+    entitlements:
+      path: App/WplanWidgetApp.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups:
+          - group.ru.itmo.wplanwidget
+
+  WplanWidgetExtension:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: WidgetExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ru.itmo.wplanwidget.widget
+        INFOPLIST_FILE: WidgetExtension/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_STYLE: Automatic
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ENABLE_HARDENED_RUNTIME: YES
+        SWIFT_VERSION: "5.0"
+        SKIP_INSTALL: YES
+    dependencies:
+      - package: WplanCore
+      - sdk: SwiftUI.framework
+      - sdk: WidgetKit.framework
+    entitlements:
+      path: WidgetExtension/WplanWidgetExtension.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups:
+          - group.ru.itmo.wplanwidget
+
+schemes:
+  WplanWidgetApp:
+    build:
+      targets:
+        WplanWidgetApp: all
+    run:
+      config: Debug
