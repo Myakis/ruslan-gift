@@ -21,6 +21,10 @@
 - No real network/VPN check — `NetworkAvailabilityChecking` is a protocol; this plan's tests use a fake, the real VPN-detection plan supplies the production implementation.
 - Dedup against the **server's** state (`WplanClient.fetchButtonState()`), not just local memory — matches the spec's "повторный клик не отправляется, если статус уже начат/завершён" (a click already made from the website itself, or from a previous app run, must still be respected).
 
+## Amendment (found while implementing Task 6)
+
+`AutoclickScheduler.tick()` evaluates start and finish semi-independently within one call rather than returning on the first branch that is "due": if the start branch resolves to `.alreadyInDesiredState`/wasn't due, evaluation falls through to check finish in the same tick (only `.clicked`/`.queuedNoNetwork`/`.sessionUnavailable` from the start branch short-circuit the whole call). This was required so a tick that lands exactly on the finish time still fires the finish click even though the start branch (due to `now >= startTime` holding for the entire rest of the day) is also "due" and resolves first. `DayState` gained `recordStartPerformed(at:)` — distinct from `markStartHandled(at:)` — so a *successful automatic* start click records the timestamp (for the 8-hour calculation) without setting the manual-override flag; only `performManualClick` sets that flag.
+
 ## Known Limitation (carried forward)
 
 The Wplan API gives no timestamp for when the day actually started (`StartOrFinishButtonState` only returns `isVisible`/`isStart` booleans — see the prior plan's "Known Limitation"). So "авто расчёт 8 часов от фактического начала" can only use the *this app instance's own* record of when it last successfully triggered a start click (`DayState.startPerformedAt`), not a true source-of-truth timestamp from the server. If the day was started by clicking directly on the Wplan website, or by a previous run of the app before this feature existed, `startPerformedAt` will be `nil` and the 8-hour auto-calculation silently has nothing to compute from until this app performs a start click itself. Follow-up (not in this plan): capture a Wplan query that returns the actual day-start timestamp, then switch `DayState` to read it from the server on `tick()` instead of recording it locally.
@@ -104,7 +108,7 @@ public actor AutoclickScheduler {
 - Consumes: `WplanClient`, `WplanButtonState` (from the prior plan).
 - Produces: `WplanDayControlling` protocol + `WplanClient: WplanDayControlling` conformance, and `FakeWplanDayController` — consumed by every scheduler test in this plan (Task 5, 6).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/Scheduling/Fakes/FakeWplanDayControllerTests.swift
@@ -146,12 +150,12 @@ final class FakeWplanDayControllerTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter FakeWplanDayControllerTests`
 Expected: FAIL — `WplanDayControlling`/`FakeWplanDayController` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Scheduling/WplanDayControlling.swift
@@ -185,12 +189,12 @@ final class FakeWplanDayController: WplanDayControlling, @unchecked Sendable {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter FakeWplanDayControllerTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Scheduling/WplanDayControlling.swift WplanCore/Tests/WplanCoreTests/Scheduling/Fakes/FakeWplanDayController.swift WplanCore/Tests/WplanCoreTests/Scheduling/Fakes/FakeWplanDayControllerTests.swift
@@ -208,7 +212,7 @@ git commit -m "feat: add WplanDayControlling protocol and test fake"
 **Interfaces:**
 - Produces: `ClockTime(hour:minute:)`, `ClockTime.date(onDayOf:calendar:) -> Date?` — consumed by `AutoclickScheduler` (Task 5) to turn "09:00" into an actual `Date` to compare against `now`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/Scheduling/ClockTimeTests.swift
@@ -243,12 +247,12 @@ final class ClockTimeTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter ClockTimeTests`
 Expected: FAIL — `ClockTime` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Scheduling/ClockTime.swift
@@ -270,12 +274,12 @@ public struct ClockTime: Equatable {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter ClockTimeTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Scheduling/ClockTime.swift WplanCore/Tests/WplanCoreTests/Scheduling/ClockTimeTests.swift
@@ -294,7 +298,7 @@ git commit -m "feat: add ClockTime"
 - Consumes: `ClockTime` (Task 2).
 - Produces: `ScheduleConfiguration` — consumed by `AutoclickScheduler` (Task 5) and, later, the Settings-window view model.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/Scheduling/ScheduleConfigurationTests.swift
@@ -322,12 +326,12 @@ final class ScheduleConfigurationTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter ScheduleConfigurationTests`
 Expected: FAIL — `ScheduleConfiguration` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Scheduling/ScheduleConfiguration.swift
@@ -358,12 +362,12 @@ public struct ScheduleConfiguration: Equatable {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter ScheduleConfigurationTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Scheduling/ScheduleConfiguration.swift WplanCore/Tests/WplanCoreTests/Scheduling/ScheduleConfigurationTests.swift
@@ -380,7 +384,7 @@ git commit -m "feat: add ScheduleConfiguration"
 
 No dedicated test for this task — it is a one-method protocol plus a trivial fake; it is exercised through `AutoclickSchedulerTests` in Task 5/6. Still commit it as its own step since it is a distinct, independently reusable interface (the VPN-detection plan implements it directly).
 
-- [ ] **Step 1: Write the implementation directly (no separate test — trivial protocol + fake, exercised by Task 5/6)**
+- [x] **Step 1: Write the implementation directly (no separate test — trivial protocol + fake, exercised by Task 5/6)**
 
 ```swift
 // WplanCore/Sources/WplanCore/Scheduling/NetworkAvailabilityChecking.swift
@@ -400,12 +404,12 @@ final class FakeNetworkAvailability: NetworkAvailabilityChecking, @unchecked Sen
 }
 ```
 
-- [ ] **Step 2: Confirm it compiles**
+- [x] **Step 2: Confirm it compiles**
 
 Run: `cd WplanCore && swift build`
 Expected: builds cleanly (no test to run yet — nothing references these types until Task 5).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Scheduling/NetworkAvailabilityChecking.swift WplanCore/Tests/WplanCoreTests/Scheduling/Fakes/FakeNetworkAvailability.swift
@@ -423,7 +427,7 @@ git commit -m "feat: add NetworkAvailabilityChecking protocol and test fake"
 **Interfaces:**
 - Produces: `DayState` (mutable value type: `startHandledManually`, `finishHandledManually`, `startPerformedAt`, `resetIfNewDay(now:calendar:)`, `markStartHandled(at:)`, `markFinishHandled()`) — consumed by `AutoclickScheduler` (Task 6).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/Scheduling/DayStateTests.swift
@@ -479,12 +483,12 @@ final class DayStateTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter DayStateTests`
 Expected: FAIL — `DayState` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Scheduling/DayState.swift
@@ -505,6 +509,13 @@ public struct DayState {
         startPerformedAt = date
     }
 
+    /// Records that an *automatic* start click succeeded, without marking it as a
+    /// manual override — added while implementing Task 6, once its tests showed the
+    /// automatic path must not set `startHandledManually` (see Task 6 Step 3 notes).
+    public mutating func recordStartPerformed(at date: Date) {
+        startPerformedAt = date
+    }
+
     public mutating func markFinishHandled() {
         finishHandledManually = true
     }
@@ -520,12 +531,12 @@ public struct DayState {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter DayStateTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Scheduling/DayState.swift WplanCore/Tests/WplanCoreTests/Scheduling/DayStateTests.swift
@@ -544,7 +555,7 @@ git commit -m "feat: add DayState for per-calendar-day autoclick bookkeeping"
 - Consumes: `WplanDayControlling` (Task 1), `ClockTime`/`ScheduleConfiguration` (Task 2/3), `NetworkAvailabilityChecking` (Task 4), `DayState` (Task 5).
 - Produces: `AutoclickTickResult`, `AutoclickScheduler.tick(now:) async -> AutoclickTickResult` — consumed by the later timer-driver plan and by tests here.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/Scheduling/AutoclickSchedulerTests.swift
@@ -672,12 +683,12 @@ final class AutoclickSchedulerTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter AutoclickSchedulerTests`
 Expected: FAIL — `AutoclickScheduler`/`AutoclickTickResult` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Scheduling/AutoclickScheduler.swift
@@ -722,11 +733,21 @@ public actor AutoclickScheduler {
             return .notDueYet
         }
 
+        // Evaluate start first; only short-circuit on a result worth reporting alone
+        // (an actual click, a queued click, or a session problem). "Already done" or
+        // "not due" must fall through so a due finish click in the same tick still runs.
+        var startResult: AutoclickTickResult?
         if configuration.autoStartEnabled,
            !dayState.startHandledManually,
            let startAt = configuration.startTime.date(onDayOf: now, calendar: calendar),
            now >= startAt {
-            return await performIfNeeded(isStart: true, now: now)
+            let result = await performIfNeeded(isStart: true, now: now)
+            switch result {
+            case .clicked, .queuedNoNetwork, .sessionUnavailable:
+                return result
+            case .alreadyInDesiredState, .notDueYet:
+                startResult = result
+            }
         }
 
         if configuration.autoFinishEnabled,
@@ -736,7 +757,7 @@ public actor AutoclickScheduler {
             return await performIfNeeded(isStart: false, now: now)
         }
 
-        return .notDueYet
+        return startResult ?? .notDueYet
     }
 
     public func performManualClick(isStart: Bool, now: Date) async throws {
@@ -769,7 +790,6 @@ public actor AutoclickScheduler {
         }
 
         guard state.isStart == isStart else {
-            if isStart { dayState.markStartHandled(at: now) } else { dayState.markFinishHandled() }
             return .alreadyInDesiredState(isStart: isStart)
         }
 
@@ -780,21 +800,19 @@ public actor AutoclickScheduler {
         }
 
         if isStart {
-            dayState.markStartHandled(at: now)
-        } else {
-            dayState.markFinishHandled()
+            dayState.recordStartPerformed(at: now)
         }
         return .clicked(isStart: isStart)
     }
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter AutoclickSchedulerTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Scheduling/AutoclickScheduler.swift WplanCore/Tests/WplanCoreTests/Scheduling/AutoclickSchedulerTests.swift

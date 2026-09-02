@@ -15,6 +15,14 @@ public struct DayState {
         startPerformedAt = date
     }
 
+    /// Records that an *automatic* start click succeeded, without marking it as a
+    /// manual override — the automatic path must still be re-evaluated (and dedup
+    /// against the server) on later ticks, unlike a manual click which overrides
+    /// the schedule for the rest of the day.
+    public mutating func recordStartPerformed(at date: Date) {
+        startPerformedAt = date
+    }
+
     public mutating func markFinishHandled() {
         finishHandledManually = true
     }
