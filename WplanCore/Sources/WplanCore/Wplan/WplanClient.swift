@@ -22,4 +22,22 @@ public final class WplanClient {
         let data: StartOrFinishButtonStateData = try await graphQL.execute(operation, method: .get, dataType: StartOrFinishButtonStateData.self)
         return data.startOrFinishDayButtonState
     }
+
+    public func login(username: String, password: String) async throws {
+        let operation = GraphQLOperation(
+            operationName: "Login",
+            variables: LoginVariables(username: username, password: password),
+            sha256Hash: Self.loginHash
+        )
+        try await graphQL.executeIgnoringResult(operation, method: .post)
+    }
+
+    public func startOrFinishDay(isStart: Bool) async throws {
+        let operation = GraphQLOperation(
+            operationName: "StartOrFinishDay",
+            variables: StartOrFinishDayVariables(isStart: isStart),
+            sha256Hash: Self.startOrFinishDayHash
+        )
+        try await graphQL.executeIgnoringResult(operation, method: .post)
+    }
 }

@@ -23,3 +23,17 @@ public struct WplanCredentials: Equatable {
 struct StartOrFinishButtonStateData: Decodable {
     let startOrFinishDayButtonState: WplanButtonState
 }
+
+struct LoginVariables: Encodable {
+    let username: String
+    let password: String
+    let accessToken2Fa = ""
+    let twoFactorCode = ""
+    let code = ""
+    let redirectUri = ""
+    let source = 1
+}
+
+struct StartOrFinishDayVariables: Encodable {
+    let isStart: Bool
+}
