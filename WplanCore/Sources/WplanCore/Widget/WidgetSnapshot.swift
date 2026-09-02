@@ -6,11 +6,16 @@ import Foundation
 /// on its own schedule cheaply. No worked-hours field yet: the Wplan API has no
 /// endpoint that returns it (see WplanCore's foundation plan's Known Limitation).
 public struct WidgetSnapshot: Codable, Equatable {
-    public let isStart: Bool
+    /// `nil` when we've never once successfully read the day status (e.g. VPN has
+    /// never connected since install) — as opposed to `vpnStatus`, which is always
+    /// known since it doesn't require reaching Wplan.
+    public let isStart: Bool?
+    public let vpnStatus: VPNNetworkChecker.Status
     public let updatedAt: Date
 
-    public init(isStart: Bool, updatedAt: Date) {
+    public init(isStart: Bool?, vpnStatus: VPNNetworkChecker.Status, updatedAt: Date) {
         self.isStart = isStart
+        self.vpnStatus = vpnStatus
         self.updatedAt = updatedAt
     }
 }

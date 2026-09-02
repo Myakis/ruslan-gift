@@ -6,6 +6,16 @@ import Foundation
 /// + пинг внутреннего хоста" — the interface check alone can't tell us the tunnel
 /// actually routes to Wplan, so both checks run.
 public final class VPNNetworkChecker: NetworkAvailabilityChecking {
+    /// The three states the design doc's screen `3a` distinguishes visually. `connecting`
+    /// means the tunnel interface is up but Wplan isn't answering yet — this could be a
+    /// tunnel still establishing its route, or a genuine problem; we can't tell those
+    /// apart from here, so it's an honest "in between" rather than a fake progress state.
+    public enum Status: String, Codable, Equatable {
+        case connected
+        case connecting
+        case disconnected
+    }
+
     /// Interface name prefixes macOS uses for VPN tunnels (utun: IKEv2/WireGuard/Network
     /// Extension tunnels, ppp: legacy PPTP/L2TP, ipsec: IPSec).
     private static let vpnInterfacePrefixes = ["utun", "ppp", "ipsec"]
@@ -24,9 +34,13 @@ public final class VPNNetworkChecker: NetworkAvailabilityChecking {
         self.probeTimeout = probeTimeout
     }
 
+    public func currentStatus() async -> Status {
+        guard Self.hasActiveVPNInterface() else { return .disconnected }
+        return await canReachWplan() ? .connected : .connecting
+    }
+
     public func isNetworkAvailable() async -> Bool {
-        guard Self.hasActiveVPNInterface() else { return false }
-        return await canReachWplan()
+        await currentStatus() == .connected
     }
 
     /// Walks the local interface list (`getifaddrs`) looking for an "up" VPN-style interface.
