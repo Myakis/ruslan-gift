@@ -119,4 +119,26 @@ final class AutoclickSchedulerTests: XCTestCase {
         XCTAssertEqual(result, .clicked(isStart: false))
         XCTAssertEqual(client.startOrFinishDayCalls, [false])
     }
+
+    func test_performManualClick_clicksImmediatelyBeforeScheduledTime() async throws {
+        let client = FakeWplanDayController()
+        let network = FakeNetworkAvailability()
+        let scheduler = AutoclickScheduler(client: client, network: network, configuration: makeConfiguration(), calendar: calendar)
+
+        try await scheduler.performManualClick(isStart: true, now: try time(hour: 7, minute: 30))
+
+        XCTAssertEqual(client.startOrFinishDayCalls, [true])
+    }
+
+    func test_performManualClick_suppressesAutomaticClickForRestOfDay() async throws {
+        let client = FakeWplanDayController()
+        let network = FakeNetworkAvailability()
+        let scheduler = AutoclickScheduler(client: client, network: network, configuration: makeConfiguration(), calendar: calendar)
+
+        try await scheduler.performManualClick(isStart: true, now: try time(hour: 7, minute: 30))
+        let laterTick = await scheduler.tick(now: try time(hour: 9, minute: 0))
+
+        XCTAssertEqual(laterTick, .notDueYet)
+        XCTAssertEqual(client.startOrFinishDayCalls, [true]) // only the manual click, no automatic one
+    }
 }

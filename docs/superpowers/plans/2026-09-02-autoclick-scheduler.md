@@ -829,7 +829,7 @@ git commit -m "feat: add AutoclickScheduler.tick() decision engine"
 **Interfaces:**
 - `performManualClick(isStart:now:)` already implemented in Task 6 — this task adds the tests proving it (a) clicks immediately regardless of scheduled time, and (b) suppresses the automatic click for the rest of the day.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // append to WplanCore/Tests/WplanCoreTests/Scheduling/AutoclickSchedulerTests.swift
@@ -858,12 +858,12 @@ extension AutoclickSchedulerTests {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter AutoclickSchedulerTests`
 Expected: PASS (all `AutoclickSchedulerTests`, including the two new ones). `performManualClick` was already implemented in Task 6, so this task only adds coverage — if either new test fails, the bug is in that method's `dayState.markStartHandled`/`markFinishHandled` calls; fix there, not here.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add WplanCore/Tests/WplanCoreTests/Scheduling/AutoclickSchedulerTests.swift
