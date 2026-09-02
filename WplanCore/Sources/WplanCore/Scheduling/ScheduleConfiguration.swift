@@ -1,4 +1,4 @@
-public struct ScheduleConfiguration: Equatable {
+public struct ScheduleConfiguration: Equatable, Codable {
     public var autoStartEnabled: Bool
     public var autoFinishEnabled: Bool
     public var startTime: ClockTime

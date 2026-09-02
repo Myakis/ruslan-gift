@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ClockTime: Equatable {
+public struct ClockTime: Equatable, Codable {
     public let hour: Int
     public let minute: Int
 

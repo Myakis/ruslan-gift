@@ -33,9 +33,17 @@ public final class WplanAutomationAgent {
     }
 
     /// Bypasses the schedule and clicks immediately — wired to the popover's
-    /// "Начать/Завершить сейчас" action.
+    /// "Начать/Завершить сейчас" action. Also cancels today's automatic click for
+    /// that action (via the scheduler's own `performManualClick`), so a manual
+    /// click and the timer loop never race each other.
     public func performManualClick(isStart: Bool) async throws {
         try await scheduler.performManualClick(isStart: isStart, now: Date())
+    }
+
+    /// Applies a new schedule to the already-running loop (e.g. after editing
+    /// Settings) without needing to stop/recreate the agent.
+    public func updateConfiguration(_ configuration: ScheduleConfiguration) async {
+        await scheduler.updateConfiguration(configuration)
     }
 }
 
