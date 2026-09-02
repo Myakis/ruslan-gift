@@ -33,6 +33,7 @@ final class AutomationController: ObservableObject {
     /// Separate from the agent's own client — only used for the periodic widget
     /// snapshot read, which happens on its own cadence independent of the schedule.
     private let statusClient: WplanClient
+    private let vpnChecker = VPNNetworkChecker()
     private var widgetRefreshTask: Task<Void, Never>?
 
     init(appGroupIdentifier: String) {
@@ -90,14 +91,22 @@ final class AutomationController: ObservableObject {
         }
     }
 
-    /// Fetches the current day status and writes it where the widget can read it,
-    /// then asks WidgetKit to redraw. Silently does nothing on failure (not logged
-    /// in - session expired - offline): the widget just keeps showing the last
-    /// known snapshot, which is preferable to flashing an error into a small tile.
+    /// Fetches the current VPN status and (VPN permitting) day status, writes them
+    /// where the widget can read them, then asks WidgetKit to redraw. VPN status is
+    /// always written, even when Wplan itself can't be reached — that's exactly the
+    /// state the widget most needs to show (design doc screen `3a`). Day status
+    /// falls back to whatever was last known if this particular fetch fails, rather
+    /// than reporting a false "not started".
     func refreshWidgetSnapshot() async {
-        guard let state = try? await statusClient.fetchButtonState() else { return }
+        let vpnStatus = await vpnChecker.currentStatus()
+        let isStart: Bool?
+        if let state = try? await statusClient.fetchButtonState() {
+            isStart = state.isStart
+        } else {
+            isStart = WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier)?.isStart
+        }
         WidgetSnapshotStore.save(
-            WidgetSnapshot(isStart: state.isStart, updatedAt: Date()),
+            WidgetSnapshot(isStart: isStart, vpnStatus: vpnStatus, updatedAt: Date()),
             appGroupIdentifier: appGroupIdentifier
         )
         WidgetCenter.shared.reloadTimelines(ofKind: Self.widgetKind)
