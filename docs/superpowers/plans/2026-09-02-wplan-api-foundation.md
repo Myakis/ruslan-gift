@@ -90,7 +90,7 @@ public struct KeychainStore {
 **Interfaces:**
 - Produces: a buildable, testable SPM package target `WplanCore` and test target `WplanCoreTests`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/SanityTests.swift
@@ -104,12 +104,12 @@ final class SanityTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter SanityTests`
 Expected: FAIL — `WplanCoreVersion` not defined (compile error).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Package.swift
@@ -136,12 +136,12 @@ public enum WplanCoreVersion {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter SanityTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Package.swift WplanCore/Sources/WplanCore/WplanCore.swift WplanCore/Tests/WplanCoreTests/SanityTests.swift
@@ -158,7 +158,7 @@ git commit -m "chore: scaffold WplanCore swift package"
 **Interfaces:**
 - Produces: `URLProtocolStub` (settable `handler: ((URLRequest) throws -> (HTTPURLResponse, Data))?`) and `URLProtocolStub.makeStubbedSession() -> URLSession`, used by every later networking test in this plan.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/Support/URLProtocolStubTests.swift
@@ -186,12 +186,12 @@ final class URLProtocolStubTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter URLProtocolStubTests`
 Expected: FAIL — `URLProtocolStub` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/Support/URLProtocolStub.swift
@@ -228,12 +228,12 @@ final class URLProtocolStub: URLProtocol {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter URLProtocolStubTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Tests/WplanCoreTests/Support/URLProtocolStub.swift WplanCore/Tests/WplanCoreTests/Support/URLProtocolStubTests.swift
@@ -251,7 +251,7 @@ git commit -m "test: add URLProtocol stub for offline networking tests"
 **Interfaces:**
 - Produces: `GraphQLOperation<Variables: Encodable>`, `PersistedQueryExtensions`, `EmptyVariables` — consumed by `GraphQLClient` (Task 4) and `WplanClient` (Task 6/7/8).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/PersistedQueryTests.swift
@@ -275,12 +275,12 @@ final class PersistedQueryTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter PersistedQueryTests`
 Expected: FAIL — `PersistedQueryExtensions`/`EmptyVariables` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/GraphQL/PersistedQuery.swift
@@ -314,12 +314,12 @@ public struct GraphQLOperation<Variables: Encodable> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter PersistedQueryTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/GraphQL/PersistedQuery.swift WplanCore/Tests/WplanCoreTests/PersistedQueryTests.swift
@@ -338,7 +338,7 @@ git commit -m "feat: add persisted-query GraphQL operation model"
 - Consumes: `GraphQLOperation<Variables>`, `PersistedQueryExtensions` (Task 3), `URLProtocolStub` (Task 2).
 - Produces: `GraphQLClient(baseURL:session:)`, `GraphQLClient.GraphQLHTTPMethod { case get, post }`, `GraphQLClient.ClientError`, `execute<Variables,ResponseData>(_:method:dataType:) async throws -> ResponseData`, `executeIgnoringResult<Variables>(_:method:) async throws -> Void` — consumed by `WplanClient` (Task 6/7/8).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/GraphQLClientTests.swift
@@ -421,12 +421,12 @@ private extension URLRequest {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter GraphQLClientTests`
 Expected: FAIL — `GraphQLClient` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/GraphQL/GraphQLClient.swift
@@ -536,12 +536,12 @@ public struct GraphQLErrorMessage: Decodable, Equatable {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter GraphQLClientTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/GraphQL/GraphQLClient.swift WplanCore/Tests/WplanCoreTests/GraphQLClientTests.swift
@@ -559,7 +559,7 @@ git commit -m "feat: add GraphQLClient for Wplan's persisted-query protocol"
 **Interfaces:**
 - Produces: `WplanSessionFactory.makeSession(appGroupIdentifier: String?) -> URLSession`, used by the app/widget/scheduler targets in later plans (not by tests in this plan, which build their own stubbed sessions directly).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/WplanSessionFactoryTests.swift
@@ -577,12 +577,12 @@ final class WplanSessionFactoryTests: XCTestCase {
 
 Note: the App-Group-backed branch (`HTTPCookieStorage(forGroupContainerIdentifier:)`) is **not** covered by an automated test here — it requires a real App Group container/entitlement that doesn't exist in a bare `swift test` process. Verify it manually once the host app target (a later plan) has the App Group entitlement configured, by confirming the widget extension and host app observe the same cookies after a login.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter WplanSessionFactoryTests`
 Expected: FAIL — `WplanSessionFactory` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Session/WplanSessionFactory.swift
@@ -604,12 +604,12 @@ public enum WplanSessionFactory {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter WplanSessionFactoryTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Session/WplanSessionFactory.swift WplanCore/Tests/WplanCoreTests/WplanSessionFactoryTests.swift
@@ -629,7 +629,7 @@ git commit -m "feat: add App-Group-aware URLSession factory for shared cookies"
 - Consumes: `GraphQLClient` (Task 4).
 - Produces: `WplanButtonState`, `WplanClient(baseURL:session:)`, `WplanClient.fetchButtonState() async throws -> WplanButtonState` — consumed by the autoclick scheduler (later plan) to decide whether a click is still needed and by the widget timeline provider to render the ring.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/WplanClientTests.swift
@@ -657,12 +657,12 @@ final class WplanClientTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter WplanClientTests`
 Expected: FAIL — `WplanClient` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Wplan/WplanModels.swift
@@ -722,12 +722,12 @@ public final class WplanClient {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter WplanClientTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Wplan/WplanModels.swift WplanCore/Sources/WplanCore/Wplan/WplanClient.swift WplanCore/Tests/WplanCoreTests/WplanClientTests.swift
@@ -745,7 +745,7 @@ git commit -m "feat: add WplanClient.fetchButtonState()"
 **Interfaces:**
 - Produces: `WplanClient.login(username:password:) async throws`, `WplanClient.startOrFinishDay(isStart:) async throws` — consumed by the autoclick scheduler and the login-window view model (later plans).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // append to WplanCore/Tests/WplanCoreTests/WplanClientTests.swift
@@ -802,12 +802,12 @@ extension WplanClientTests {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter WplanClientTests`
 Expected: FAIL — `login`/`startOrFinishDay` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // add to WplanCore/Sources/WplanCore/Wplan/WplanClient.swift, inside WplanClient
@@ -847,12 +847,12 @@ struct StartOrFinishDayVariables: Encodable {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter WplanClientTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Wplan/WplanClient.swift WplanCore/Sources/WplanCore/Wplan/WplanModels.swift WplanCore/Tests/WplanCoreTests/WplanClientTests.swift
@@ -871,7 +871,7 @@ git commit -m "feat: add WplanClient.login() and startOrFinishDay()"
 - Consumes: `WplanCredentials` (Task 6).
 - Produces: `KeychainStore(service:)`, `save(_:) throws`, `load() throws -> WplanCredentials?`, `delete() throws` — consumed by the login-window view model and the autoclick scheduler (later plans) to read stored credentials before calling `WplanClient.login`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```swift
 // WplanCore/Tests/WplanCoreTests/KeychainStoreTests.swift
@@ -916,12 +916,12 @@ final class KeychainStoreTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd WplanCore && swift test --filter KeychainStoreTests`
 Expected: FAIL — `KeychainStore` not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```swift
 // WplanCore/Sources/WplanCore/Credentials/KeychainStore.swift
@@ -990,12 +990,12 @@ private struct CodablePair: Codable {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd WplanCore && swift test --filter KeychainStoreTests`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add WplanCore/Sources/WplanCore/Credentials/KeychainStore.swift WplanCore/Tests/WplanCoreTests/KeychainStoreTests.swift
