@@ -16,6 +16,7 @@
 		84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */; };
 		AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */; };
 		E9E0DE790F5E32A1C145F3C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7197FE8E362B255F06490F7 /* WidgetKit.framework */; };
+		F8D5B8D37EE0CA9780C80250 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A299DBB1101D8E354A8CEBD5 /* LoginView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		5EC52A855CC5C2C8AA371CA3 /* WplanWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WplanWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WplanWidgetApp.swift; sourceTree = "<group>"; };
 		7BE6F9AEACAEAD77A5C67EB5 /* WplanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WplanCore; path = ../WplanCore; sourceTree = SOURCE_ROOT; };
+		A299DBB1101D8E354A8CEBD5 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AC8BF008F89ABEB8B6138E3D /* WplanWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WplanWidgetExtension.entitlements; sourceTree = "<group>"; };
 		BDE7CE3149A4E896C6305635 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D385952A9341A65F274CA9F3 /* MenuBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarModel.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 		DCC6AA699110FB562CE68ABD /* App */ = {
 			isa = PBXGroup;
 			children = (
+				A299DBB1101D8E354A8CEBD5 /* LoginView.swift */,
 				08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */,
 				D385952A9341A65F274CA9F3 /* MenuBarModel.swift */,
 				F5127153EBD41C00C8441797 /* WplanWidgetApp.entitlements */,
@@ -233,6 +236,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F8D5B8D37EE0CA9780C80250 /* LoginView.swift in Sources */,
 				AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */,
 				51B2A436EA0EFB89CB2F8AAF /* MenuBarModel.swift in Sources */,
 				84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */,

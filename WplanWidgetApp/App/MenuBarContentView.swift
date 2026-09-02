@@ -5,17 +5,27 @@ struct MenuBarContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(model.isLoggedIn ? "Учётные данные сохранены" : "Не авторизован")
-                .font(.headline)
-            Text(model.vpnStatusText)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            if model.isLoggedIn {
+                Text("Учётные данные сохранены")
+                    .font(.headline)
+                Text(model.vpnStatusText)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Divider()
+
+                Button("Обновить") {
+                    Task { await model.refresh() }
+                }
+                Button("Выйти из аккаунта") {
+                    model.logout()
+                }
+            } else {
+                LoginView(model: model)
+            }
 
             Divider()
 
-            Button("Обновить") {
-                Task { await model.refresh() }
-            }
             Button("Выход") {
                 NSApplication.shared.terminate(nil)
             }
