@@ -2,9 +2,10 @@ import Foundation
 import WplanCore
 
 /// Menu-bar view model: real login (via `WplanClient.login`, credentials persisted
-/// to `KeychainStore`), real VPN status, and manual start/finish clicks. Not yet
-/// wired to `AutoclickScheduler`/`WplanAutomationAgent` for the actual schedule —
-/// that needs a settings UI first.
+/// to `KeychainStore`), real VPN status, and a read-only day-status check. Manual
+/// start/finish clicks live on `AutomationController` instead (so they go through
+/// the same scheduler that runs the automatic schedule, keeping its day-bookkeeping
+/// in sync — see its doc comment).
 @MainActor
 final class MenuBarModel: ObservableObject {
     static let appGroupIdentifier = "group.ru.itmo.wplanwidget"
@@ -13,8 +14,6 @@ final class MenuBarModel: ObservableObject {
     @Published var vpnStatusText = "Проверка…"
     @Published var buttonStateText: String?
     @Published var isCheckingButtonState = false
-    @Published var manualActionText: String?
-    @Published var isPerformingManualAction = false
 
     @Published var username = ""
     @Published var password = ""
@@ -51,7 +50,7 @@ final class MenuBarModel: ObservableObject {
             password = ""
             isLoggedIn = true
         } catch {
-            loginErrorMessage = "Не удалось войти: \(Self.describe(error))"
+            loginErrorMessage = "Не удалось войти: \(describeWplanError(error))"
         }
     }
 
@@ -71,36 +70,7 @@ final class MenuBarModel: ObservableObject {
                 ? "День не начат (кнопка = «Начать»)"
                 : "День уже идёт (кнопка = «Завершить»)"
         } catch {
-            buttonStateText = "Ошибка: \(Self.describe(error))"
+            buttonStateText = "Ошибка: \(describeWplanError(error))"
         }
-    }
-
-    /// "Начать/Завершить сейчас" — bypasses any schedule, per the spec's
-    /// "ручное действие доступно всегда из поповера".
-    func performManualClick(isStart: Bool) async {
-        isPerformingManualAction = true
-        defer { isPerformingManualAction = false }
-        do {
-            try await client.startOrFinishDay(isStart: isStart)
-            manualActionText = isStart ? "Начало дня отправлено" : "Завершение дня отправлено"
-            await checkButtonState()
-        } catch {
-            manualActionText = "Ошибка: \(Self.describe(error))"
-        }
-    }
-
-    private static func describe(_ error: Error) -> String {
-        if let clientError = error as? GraphQLClient.ClientError {
-            switch clientError {
-            case .invalidResponse:
-                return "неожиданный/пустой ответ сервера"
-            case .http(let status, let body):
-                return "HTTP \(status) — \(body)"
-            case .graphQL(let messages):
-                return messages.joined(separator: "; ")
-            }
-        }
-        let nsError = error as NSError
-        return "[\(nsError.domain) \(nsError.code)] \(nsError.localizedDescription)"
     }
 }

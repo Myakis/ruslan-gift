@@ -12,10 +12,13 @@
 		28B3DBFE58AB54291B1562F3 /* WplanWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5EC52A855CC5C2C8AA371CA3 /* WplanWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		51B2A436EA0EFB89CB2F8AAF /* MenuBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D385952A9341A65F274CA9F3 /* MenuBarModel.swift */; };
 		5F922094F361F662370B428A /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E08D77F290F16995646B313E /* SwiftUI.framework */; };
+		634B3506EEB7729AD47C9CEA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BD40BC5D03036765B0424F /* SettingsView.swift */; };
 		71DFEE4F42AD764539B8330F /* WplanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 94648182020CF7C4B9B4B526 /* WplanCore */; };
 		84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */; };
 		AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */; };
+		D46455CB38FA508CB1A8D4D6 /* AutomationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D98A3923ABE0E24FACDEAB /* AutomationController.swift */; };
 		E9E0DE790F5E32A1C145F3C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7197FE8E362B255F06490F7 /* WidgetKit.framework */; };
+		F50CCD5AAA3231B372E39598 /* ErrorDescribing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426BDA42D5AE4B758182E113 /* ErrorDescribing.swift */; };
 		F8D5B8D37EE0CA9780C80250 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A299DBB1101D8E354A8CEBD5 /* LoginView.swift */; };
 /* End PBXBuildFile section */
 
@@ -45,14 +48,17 @@
 
 /* Begin PBXFileReference section */
 		08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		13D98A3923ABE0E24FACDEAB /* AutomationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationController.swift; sourceTree = "<group>"; };
 		1CC0D7DC0BF1BF554F662C29 /* WplanWidgetApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WplanWidgetApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C5E55EAC206DC9DB9BE426E /* WplanRingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WplanRingWidget.swift; sourceTree = "<group>"; };
+		426BDA42D5AE4B758182E113 /* ErrorDescribing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDescribing.swift; sourceTree = "<group>"; };
 		5EC52A855CC5C2C8AA371CA3 /* WplanWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WplanWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WplanWidgetApp.swift; sourceTree = "<group>"; };
 		7BE6F9AEACAEAD77A5C67EB5 /* WplanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WplanCore; path = ../WplanCore; sourceTree = SOURCE_ROOT; };
 		A299DBB1101D8E354A8CEBD5 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AC8BF008F89ABEB8B6138E3D /* WplanWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WplanWidgetExtension.entitlements; sourceTree = "<group>"; };
 		BDE7CE3149A4E896C6305635 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C5BD40BC5D03036765B0424F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D385952A9341A65F274CA9F3 /* MenuBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarModel.swift; sourceTree = "<group>"; };
 		E08D77F290F16995646B313E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		F5127153EBD41C00C8441797 /* WplanWidgetApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WplanWidgetApp.entitlements; sourceTree = "<group>"; };
@@ -131,9 +137,12 @@
 		DCC6AA699110FB562CE68ABD /* App */ = {
 			isa = PBXGroup;
 			children = (
+				13D98A3923ABE0E24FACDEAB /* AutomationController.swift */,
+				426BDA42D5AE4B758182E113 /* ErrorDescribing.swift */,
 				A299DBB1101D8E354A8CEBD5 /* LoginView.swift */,
 				08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */,
 				D385952A9341A65F274CA9F3 /* MenuBarModel.swift */,
+				C5BD40BC5D03036765B0424F /* SettingsView.swift */,
 				F5127153EBD41C00C8441797 /* WplanWidgetApp.entitlements */,
 				680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */,
 			);
@@ -236,9 +245,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D46455CB38FA508CB1A8D4D6 /* AutomationController.swift in Sources */,
+				F50CCD5AAA3231B372E39598 /* ErrorDescribing.swift in Sources */,
 				F8D5B8D37EE0CA9780C80250 /* LoginView.swift in Sources */,
 				AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */,
 				51B2A436EA0EFB89CB2F8AAF /* MenuBarModel.swift in Sources */,
+				634B3506EEB7729AD47C9CEA /* SettingsView.swift in Sources */,
 				84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

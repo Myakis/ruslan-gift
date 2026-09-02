@@ -2,6 +2,8 @@ import SwiftUI
 
 struct MenuBarContentView: View {
     @ObservedObject var model: MenuBarModel
+    @ObservedObject var automation: AutomationController
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -11,6 +13,9 @@ struct MenuBarContentView: View {
                 Text(model.vpnStatusText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                Text(automation.isRunning ? "Автоматизация: включена" : "Автоматизация: выключена")
+                    .font(.caption)
+                    .foregroundStyle(automation.isRunning ? .green : .secondary)
 
                 Divider()
 
@@ -41,17 +46,17 @@ struct MenuBarContentView: View {
 
                 HStack {
                     Button("Начать сейчас") {
-                        Task { await model.performManualClick(isStart: true) }
+                        Task { await automation.performManualClick(isStart: true) }
                     }
                     Button("Завершить сейчас") {
-                        Task { await model.performManualClick(isStart: false) }
+                        Task { await automation.performManualClick(isStart: false) }
                     }
                 }
-                .disabled(model.isPerformingManualAction)
+                .disabled(automation.isPerformingManualAction)
 
-                if model.isPerformingManualAction {
+                if automation.isPerformingManualAction {
                     ProgressView().controlSize(.small)
-                } else if let manualActionText = model.manualActionText {
+                } else if let manualActionText = automation.manualActionText {
                     Text(manualActionText)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -61,6 +66,9 @@ struct MenuBarContentView: View {
 
                 Divider()
 
+                Button("Настройки…") {
+                    openWindow(id: "settings")
+                }
                 Button("Выйти из аккаунта") {
                     model.logout()
                 }
