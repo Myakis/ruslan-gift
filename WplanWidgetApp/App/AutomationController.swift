@@ -1,14 +1,21 @@
 import Foundation
+import WidgetKit
 import WplanCore
 
 /// Owns the schedule (persisted to UserDefaults in the App Group suite) and the
 /// running `WplanAutomationAgent`. Manual clicks route through here (not through a
 /// separate raw `WplanClient`) so the scheduler's own day-bookkeeping stays in sync
 /// — a manual click must cancel today's automatic click for that action, per spec.
+///
+/// Also periodically refreshes the shared `WidgetSnapshot` the widget extension
+/// reads — the widget can't cheaply call WplanClient on its own, so the host app
+/// is the one source of truth writing into the App Group container.
 @MainActor
 final class AutomationController: ObservableObject {
     private static let configurationKey = "scheduleConfiguration"
     private static let isRunningKey = "automationIsRunning"
+    private static let widgetKind = "WplanRingWidget"
+    private static let widgetRefreshInterval: TimeInterval = 5 * 60
 
     @Published var configuration: ScheduleConfiguration {
         didSet {
@@ -20,10 +27,16 @@ final class AutomationController: ObservableObject {
     @Published var manualActionText: String?
     @Published var isPerformingManualAction = false
 
+    private let appGroupIdentifier: String
     private let defaults: UserDefaults?
     private let agent: WplanAutomationAgent
+    /// Separate from the agent's own client — only used for the periodic widget
+    /// snapshot read, which happens on its own cadence independent of the schedule.
+    private let statusClient: WplanClient
+    private var widgetRefreshTask: Task<Void, Never>?
 
     init(appGroupIdentifier: String) {
+        self.appGroupIdentifier = appGroupIdentifier
         let defaults = UserDefaults(suiteName: appGroupIdentifier)
         self.defaults = defaults
 
@@ -45,11 +58,14 @@ final class AutomationController: ObservableObject {
 
         let initialAgent = WplanAutomation.makeAgent(appGroupIdentifier: appGroupIdentifier, configuration: initialConfiguration)
         agent = initialAgent
+        statusClient = WplanClient(session: WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier))
         let shouldRun = defaults?.bool(forKey: Self.isRunningKey) ?? false
         isRunning = shouldRun
         if shouldRun {
             initialAgent.start()
         }
+
+        startWidgetRefreshLoop()
     }
 
     func setRunning(_ running: Bool) {
@@ -68,8 +84,31 @@ final class AutomationController: ObservableObject {
         do {
             try await agent.performManualClick(isStart: isStart)
             manualActionText = isStart ? "Начало дня отправлено" : "Завершение дня отправлено"
+            await refreshWidgetSnapshot()
         } catch {
             manualActionText = "Ошибка: \(describeWplanError(error))"
+        }
+    }
+
+    /// Fetches the current day status and writes it where the widget can read it,
+    /// then asks WidgetKit to redraw. Silently does nothing on failure (not logged
+    /// in - session expired - offline): the widget just keeps showing the last
+    /// known snapshot, which is preferable to flashing an error into a small tile.
+    func refreshWidgetSnapshot() async {
+        guard let state = try? await statusClient.fetchButtonState() else { return }
+        WidgetSnapshotStore.save(
+            WidgetSnapshot(isStart: state.isStart, updatedAt: Date()),
+            appGroupIdentifier: appGroupIdentifier
+        )
+        WidgetCenter.shared.reloadTimelines(ofKind: Self.widgetKind)
+    }
+
+    private func startWidgetRefreshLoop() {
+        widgetRefreshTask = Task { [weak self] in
+            while let self, !Task.isCancelled {
+                await self.refreshWidgetSnapshot()
+                try? await Task.sleep(nanoseconds: UInt64(Self.widgetRefreshInterval * 1_000_000_000))
+            }
         }
     }
 

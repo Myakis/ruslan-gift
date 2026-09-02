@@ -13,6 +13,7 @@
 		51B2A436EA0EFB89CB2F8AAF /* MenuBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D385952A9341A65F274CA9F3 /* MenuBarModel.swift */; };
 		5F922094F361F662370B428A /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E08D77F290F16995646B313E /* SwiftUI.framework */; };
 		634B3506EEB7729AD47C9CEA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BD40BC5D03036765B0424F /* SettingsView.swift */; };
+		6AE8618AF5BA90CFF704ED0C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7197FE8E362B255F06490F7 /* WidgetKit.framework */; };
 		71DFEE4F42AD764539B8330F /* WplanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 94648182020CF7C4B9B4B526 /* WplanCore */; };
 		84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */; };
 		AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */; };
@@ -81,6 +82,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				71DFEE4F42AD764539B8330F /* WplanCore in Frameworks */,
+				6AE8618AF5BA90CFF704ED0C /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,33 +1,63 @@
 import WidgetKit
 import SwiftUI
+import WplanCore
 
-/// Static placeholder for the "кольцо дня" screen (design doc `1a`) — proves the
-/// widget extension target builds and links against WplanCore, no live data yet.
-/// Wiring this to `AutoclickScheduler`'s real state is a later plan (needs the
-/// App Group-shared state the host app writes to).
+/// "Кольцо дня" (design doc `1a`), now reading the real `WidgetSnapshot` the host
+/// app writes to the App Group container — see `AutomationController` for the
+/// write side. No worked-hours field: the Wplan API doesn't expose one (see
+/// WplanCore's foundation plan's Known Limitation), so this shows only the
+/// isStart/isFinished boolean state, not an elapsed-time ring fill.
+private let appGroupIdentifier = "group.ru.itmo.wplanwidget"
+
 struct WplanRingProvider: TimelineProvider {
     func placeholder(in context: Context) -> WplanRingEntry {
-        WplanRingEntry(date: Date(), statusText: "День идёт", workedHoursText: "5:42")
+        WplanRingEntry(date: Date(), snapshot: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (WplanRingEntry) -> Void) {
-        completion(placeholder(in: context))
+        completion(currentEntry())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WplanRingEntry>) -> Void) {
-        let entry = placeholder(in: context)
+        let entry = currentEntry()
+        // The host app pushes a reload via WidgetCenter whenever it has fresher data;
+        // this policy is just a safety net in case that never fires.
         completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(15 * 60))))
+    }
+
+    private func currentEntry() -> WplanRingEntry {
+        WplanRingEntry(date: Date(), snapshot: WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier))
     }
 }
 
 struct WplanRingEntry: TimelineEntry {
     let date: Date
-    let statusText: String
-    let workedHoursText: String
+    let snapshot: WidgetSnapshot?
 }
 
 struct WplanRingWidgetView: View {
     let entry: WplanRingEntry
+
+    private var isRunning: Bool? {
+        // WidgetSnapshot.isStart: true means the *next* action is "start" (day not
+        // running); false means the day is running (next action is "finish").
+        entry.snapshot.map { !$0.isStart }
+    }
+
+    private var statusText: String {
+        switch isRunning {
+        case .some(true): return "День идёт"
+        case .some(false): return "День не начат"
+        case .none: return "Нет данных"
+        }
+    }
+
+    private var updatedText: String {
+        guard let updatedAt = entry.snapshot?.updatedAt else { return "" }
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return "обновлено \(formatter.string(from: updatedAt))"
+    }
 
     var body: some View {
         VStack(spacing: 4) {
@@ -37,17 +67,22 @@ struct WplanRingWidgetView: View {
             ZStack {
                 Circle()
                     .stroke(Color.secondary.opacity(0.15), lineWidth: 6)
-                Circle()
-                    .trim(from: 0, to: 0.71)
-                    .stroke(Color.green, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                Text(entry.workedHoursText)
-                    .font(.system(size: 18, weight: .medium))
+                if isRunning == true {
+                    Circle()
+                        .stroke(Color.green, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                }
+                Image(systemName: isRunning == true ? "checkmark" : "clock")
+                    .foregroundStyle(.secondary)
             }
             .padding(6)
-            Text(entry.statusText)
+            Text(statusText)
                 .font(.system(size: 10))
                 .foregroundStyle(.secondary)
+            if !updatedText.isEmpty {
+                Text(updatedText)
+                    .font(.system(size: 8))
+                    .foregroundStyle(.tertiary)
+            }
         }
         .padding()
         .containerBackground(.fill.tertiary, for: .widget)

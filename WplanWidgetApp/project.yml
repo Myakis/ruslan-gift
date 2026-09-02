@@ -28,6 +28,7 @@ targets:
         SWIFT_VERSION: "5.0"
     dependencies:
       - package: WplanCore
+      - sdk: WidgetKit.framework
       - target: WplanWidgetExtension
         embed: true
     entitlements:
