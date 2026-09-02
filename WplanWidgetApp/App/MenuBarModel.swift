@@ -47,7 +47,8 @@ final class MenuBarModel: ObservableObject {
             password = ""
             isLoggedIn = true
         } catch {
-            loginErrorMessage = "Не удалось войти: \(error.localizedDescription)"
+            let nsError = error as NSError
+            loginErrorMessage = "Не удалось войти: [\(nsError.domain) \(nsError.code)] \(nsError.localizedDescription)"
         }
     }
 
