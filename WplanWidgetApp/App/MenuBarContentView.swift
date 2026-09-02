@@ -37,6 +37,30 @@ struct MenuBarContentView: View {
                         .textSelection(.enabled)
                 }
 
+                Divider()
+
+                HStack {
+                    Button("Начать сейчас") {
+                        Task { await model.performManualClick(isStart: true) }
+                    }
+                    Button("Завершить сейчас") {
+                        Task { await model.performManualClick(isStart: false) }
+                    }
+                }
+                .disabled(model.isPerformingManualAction)
+
+                if model.isPerformingManualAction {
+                    ProgressView().controlSize(.small)
+                } else if let manualActionText = model.manualActionText {
+                    Text(manualActionText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
+
+                Divider()
+
                 Button("Выйти из аккаунта") {
                     model.logout()
                 }
