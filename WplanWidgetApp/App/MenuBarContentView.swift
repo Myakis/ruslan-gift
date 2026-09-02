@@ -20,11 +20,17 @@ struct MenuBarContentView: View {
                 Divider()
 
                 Button("Обновить") {
-                    Task { await model.refresh() }
+                    Task {
+                        await model.refresh()
+                        await automation.refreshWidgetSnapshot()
+                    }
                 }
 
                 Button {
-                    Task { await model.checkButtonState() }
+                    Task {
+                        await model.checkButtonState()
+                        await automation.refreshWidgetSnapshot()
+                    }
                 } label: {
                     if model.isCheckingButtonState {
                         ProgressView().controlSize(.small)
