@@ -59,7 +59,7 @@ struct MenuBarContentView: View {
                         title: model.isRunningDay == true ? "Завершить" : "Начать",
                         systemImage: model.isRunningDay == true ? "stop.circle" : "play.circle",
                         tint: model.isRunningDay == true ? .red : .green,
-                        isLoading: automation.isPerformingManualAction
+                        isLoading: automation.isPerformingManualAction || model.isCheckingButtonState
                     ) {
                         let isStart = model.isRunningDay != true
                         Task {
