@@ -60,6 +60,7 @@ struct MenuBarLabelView: View {
     var body: some View {
         HStack(spacing: 4) {
             Image("MenuBarIcon")
+                .renderingMode(.original)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 18, height: 18)

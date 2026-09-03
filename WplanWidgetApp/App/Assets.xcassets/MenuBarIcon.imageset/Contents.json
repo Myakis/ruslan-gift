@@ -2,5 +2,8 @@
   "images" : [
     { "filename" : "wplan-logo-7c-icon.png", "idiom" : "universal", "scale" : "1x" }
   ],
+  "properties" : {
+    "template-rendering-intent" : "original"
+  },
   "info" : { "author" : "xcode", "version" : 1 }
 }
