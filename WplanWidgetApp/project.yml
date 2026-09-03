@@ -24,6 +24,7 @@ targets:
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: "Приложению нужен доступ к корпоративной сети, чтобы обращаться к Wplan через VPN."
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 8W787APH48
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "7"
         ENABLE_HARDENED_RUNTIME: YES
@@ -52,6 +53,7 @@ targets:
         INFOPLIST_FILE: WidgetExtension/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 8W787APH48
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "7"
         ENABLE_HARDENED_RUNTIME: YES

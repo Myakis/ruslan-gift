@@ -214,9 +214,11 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					496914F03E38B2CA2B43711F = {
+						DevelopmentTeam = 8W787APH48;
 						ProvisioningStyle = Automatic;
 					};
 					64B2225C95FD2B3EB3B79275 = {
+						DevelopmentTeam = 8W787APH48;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -298,6 +300,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 7;
+				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WidgetExtension/Info.plist;
@@ -322,6 +325,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 7;
+				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Wplan;
@@ -346,6 +350,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 7;
+				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WidgetExtension/Info.plist;
@@ -370,6 +375,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 7;
+				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Wplan;
