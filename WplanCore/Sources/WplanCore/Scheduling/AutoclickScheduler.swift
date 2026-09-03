@@ -46,6 +46,16 @@ public actor AutoclickScheduler {
         effectiveFinishTime(now: now)
     }
 
+    /// Restores a start timestamp recorded by a *previous process* (see
+    /// `DayState.startPerformedAt`'s doc comment — it only lives in memory
+    /// otherwise, so a relaunch mid-day would otherwise forget it entirely).
+    /// A no-op if `date` isn't within today's calendar day.
+    public func seedStartedAt(_ date: Date, now: Date) {
+        dayState.resetIfNewDay(now: now, calendar: calendar)
+        guard calendar.isDate(date, inSameDayAs: now) else { return }
+        dayState.recordStartPerformed(at: date)
+    }
+
     public func tick(now: Date) async -> AutoclickTickResult {
         dayState.resetIfNewDay(now: now, calendar: calendar)
 

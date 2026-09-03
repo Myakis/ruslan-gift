@@ -55,6 +55,12 @@ public final class WplanAutomationAgent {
     public func currentScheduledFinishAt(now: Date) async -> Date? {
         await scheduler.currentScheduledFinishAt(now: now)
     }
+
+    /// Restores a start timestamp persisted by a previous process — see
+    /// `AutoclickScheduler.seedStartedAt(_:now:)`.
+    public func seedStartedAt(_ date: Date) async {
+        await scheduler.seedStartedAt(date, now: Date())
+    }
 }
 
 /// Composition root: builds the full WplanCore stack (session, client, VPN check,
