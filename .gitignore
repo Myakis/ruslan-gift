@@ -11,3 +11,8 @@ Package.resolved
 **/*.xcworkspace/xcuserdata/
 DerivedData/
 *.xcuserstate
+
+# Exported/archived app builds (Xcode Organizer "Copy App" output, etc.)
+**/*.app/
+**/*.xcarchive/
+WplanWidgetApp/WplanWidgetApp [0-9]*/
