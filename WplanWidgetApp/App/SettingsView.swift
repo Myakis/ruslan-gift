@@ -8,7 +8,6 @@ private let weekdayLabels: [(value: Int, label: String)] = [
 struct SettingsView: View {
     @ObservedObject var automation: AutomationController
     @StateObject private var status = MenuBarStatusModel()
-    @Environment(\.dismissWindow) private var dismissWindow
     /// Ticks every second so "Осталось"/"Время" move smoothly, independent of
     /// `status`'s own (much coarser) 15s snapshot refresh.
     @State private var now = Date()
@@ -94,16 +93,10 @@ struct SettingsView: View {
                         }
                     }
                 }
-
-                Button("Готово") { dismissWindow(id: "settings") }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.green)
-                    .frame(maxWidth: .infinity)
-                    .controlSize(.large)
             }
             .padding(16)
         }
-        .frame(width: 340, height: 500)
+        .frame(width: 340)
         .onReceive(clockTimer) { now = $0 }
     }
 
@@ -159,11 +152,15 @@ struct SettingsView: View {
     }
 
     private func toggleRow(_ title: String, isOn: Binding<Bool>) -> some View {
-        Toggle(isOn: isOn) {
+        HStack {
             Text(title).font(.system(size: 12.5))
+            Spacer(minLength: 8)
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .tint(.green)
         }
-        .toggleStyle(.switch)
-        .tint(.green)
+        .frame(maxWidth: .infinity)
     }
 
     private func timeBox(label: String, selection: Binding<Date>) -> some View {
