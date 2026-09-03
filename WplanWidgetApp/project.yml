@@ -18,6 +18,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ru.itmo.wplanwidget
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Wplan"
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: "Приложению нужен доступ к корпоративной сети, чтобы обращаться к Wplan через VPN."
