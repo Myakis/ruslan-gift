@@ -12,6 +12,8 @@ struct SettingsView: View {
     /// `status`'s own (much coarser) 15s snapshot refresh.
     @State private var now = Date()
     private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    @State private var launchAtLoginEnabled = LaunchAtLogin.isEnabled
+    @State private var launchAtLoginError: String?
 
     private var isRunning: Bool? {
         status.snapshot?.isStart.map { !$0 }
@@ -91,6 +93,26 @@ struct SettingsView: View {
                             )
                             .foregroundStyle(isActive ? .green : .secondary)
                         }
+                    }
+                }
+
+                sectionBlock(title: "Приложение") {
+                    toggleRow("Запускать при входе в систему", isOn: Binding(
+                        get: { launchAtLoginEnabled },
+                        set: { newValue in
+                            do {
+                                try LaunchAtLogin.setEnabled(newValue)
+                                launchAtLoginEnabled = newValue
+                                launchAtLoginError = nil
+                            } catch {
+                                launchAtLoginError = error.localizedDescription
+                            }
+                        }
+                    ))
+                    if let launchAtLoginError {
+                        Text(launchAtLoginError)
+                            .font(.system(size: 10))
+                            .foregroundStyle(.red)
                     }
                 }
             }
