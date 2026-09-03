@@ -16,3 +16,5 @@ DerivedData/
 **/*.app/
 **/*.xcarchive/
 WplanWidgetApp/WplanWidgetApp [0-9]*/
+WplanWidgetApp/build_archive/
+*.dmg
