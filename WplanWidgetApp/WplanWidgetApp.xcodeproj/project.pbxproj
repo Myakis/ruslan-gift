@@ -21,6 +21,7 @@
 		D73ABAC6E799B7782A12BD0A /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB5A749150ECB79F891593B /* MenuBarLabelView.swift */; };
 		E9E0DE790F5E32A1C145F3C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7197FE8E362B255F06490F7 /* WidgetKit.framework */; };
 		F50CCD5AAA3231B372E39598 /* ErrorDescribing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426BDA42D5AE4B758182E113 /* ErrorDescribing.swift */; };
+		F685C3A8091B6BCCDAA19340 /* MenuBarStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F7EF9BC3374C1188BFB71F /* MenuBarStyle.swift */; };
 		F8D5B8D37EE0CA9780C80250 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A299DBB1101D8E354A8CEBD5 /* LoginView.swift */; };
 /* End PBXBuildFile section */
 
@@ -60,6 +61,7 @@
 		7BE6F9AEACAEAD77A5C67EB5 /* WplanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WplanCore; path = ../WplanCore; sourceTree = SOURCE_ROOT; };
 		A299DBB1101D8E354A8CEBD5 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AC8BF008F89ABEB8B6138E3D /* WplanWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WplanWidgetExtension.entitlements; sourceTree = "<group>"; };
+		B3F7EF9BC3374C1188BFB71F /* MenuBarStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarStyle.swift; sourceTree = "<group>"; };
 		BDE7CE3149A4E896C6305635 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C5BD40BC5D03036765B0424F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D385952A9341A65F274CA9F3 /* MenuBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarModel.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				08FCAE343BCC0BE3F841E656 /* MenuBarContentView.swift */,
 				1CB5A749150ECB79F891593B /* MenuBarLabelView.swift */,
 				D385952A9341A65F274CA9F3 /* MenuBarModel.swift */,
+				B3F7EF9BC3374C1188BFB71F /* MenuBarStyle.swift */,
 				C5BD40BC5D03036765B0424F /* SettingsView.swift */,
 				F5127153EBD41C00C8441797 /* WplanWidgetApp.entitlements */,
 				680DCFEF8399CB47438CEFBB /* WplanWidgetApp.swift */,
@@ -256,6 +259,7 @@
 				AD1D1A8DD278A61F38DE0A98 /* MenuBarContentView.swift in Sources */,
 				D73ABAC6E799B7782A12BD0A /* MenuBarLabelView.swift in Sources */,
 				51B2A436EA0EFB89CB2F8AAF /* MenuBarModel.swift in Sources */,
+				F685C3A8091B6BCCDAA19340 /* MenuBarStyle.swift in Sources */,
 				634B3506EEB7729AD47C9CEA /* SettingsView.swift in Sources */,
 				84EB6D89AE41E280E70B9A65 /* WplanWidgetApp.swift in Sources */,
 			);

@@ -11,8 +11,9 @@ final class MenuBarModel: ObservableObject {
     static let appGroupIdentifier = "group.ru.itmo.wplanwidget"
 
     @Published var isLoggedIn = false
-    @Published var vpnStatusText = "Проверка…"
+    @Published var vpnStatus: VPNNetworkChecker.Status = .disconnected
     @Published var buttonStateText: String?
+    @Published var isRunningDay: Bool?
     @Published var isCheckingButtonState = false
 
     @Published var username = ""
@@ -31,8 +32,7 @@ final class MenuBarModel: ObservableObject {
 
     func refresh() async {
         isLoggedIn = (try? keychain.load()) != nil
-        let available = await vpnChecker.isNetworkAvailable()
-        vpnStatusText = available ? "VPN: подключён, Wplan доступен" : "VPN: недоступен"
+        vpnStatus = await vpnChecker.currentStatus()
     }
 
     func login() async {
@@ -66,6 +66,7 @@ final class MenuBarModel: ObservableObject {
         defer { isCheckingButtonState = false }
         do {
             let state = try await client.fetchButtonState()
+            isRunningDay = !state.isStart
             buttonStateText = state.isStart
                 ? "День не начат (кнопка = «Начать»)"
                 : "День уже идёт (кнопка = «Завершить»)"

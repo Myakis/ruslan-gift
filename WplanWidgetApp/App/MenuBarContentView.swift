@@ -5,78 +5,89 @@ struct MenuBarContentView: View {
     @ObservedObject var automation: AutomationController
     @Environment(\.openWindow) private var openWindow
 
+    private var headline: String {
+        switch model.vpnStatus {
+        case .disconnected: return "VPN не подключён"
+        case .connecting: return "Подключение к VPN…"
+        case .connected:
+            switch model.isRunningDay {
+            case .some(true): return "День идёт"
+            case .some(false): return "День не начат"
+            case .none: return "Учётные данные сохранены"
+            }
+        }
+    }
+
+    private var subtitle: String? {
+        if let buttonStateText = model.buttonStateText { return buttonStateText }
+        if model.vpnStatus != .connected { return "Включите VPN — клик выполнится сам" }
+        return nil
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             if model.isLoggedIn {
-                Text("Учётные данные сохранены")
-                    .font(.headline)
-                Text(model.vpnStatusText)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text(automation.isRunning ? "Автоматизация: включена" : "Автоматизация: выключена")
-                    .font(.caption)
-                    .foregroundStyle(automation.isRunning ? .green : .secondary)
+                StatusCard(
+                    eyebrow: "WPLAN · \(automation.isRunning ? "АВТО ВКЛ" : "АВТО ВЫКЛ")",
+                    vpnStatus: model.vpnStatus,
+                    dotColor: MenuBarStyle.vpnColor(model.vpnStatus, isRunning: model.isRunningDay),
+                    headline: headline,
+                    subtitle: subtitle
+                )
 
-                Divider()
-
-                Button("Обновить") {
-                    Task {
-                        await model.refresh()
-                        await automation.refreshWidgetSnapshot()
+                VStack(spacing: 2) {
+                    MenuActionButton(title: "Обновить", systemImage: "arrow.clockwise") {
+                        Task {
+                            await model.refresh()
+                            await automation.refreshWidgetSnapshot()
+                        }
+                    }
+                    MenuActionButton(
+                        title: "Проверить статус дня",
+                        systemImage: "checkmark.circle",
+                        isLoading: model.isCheckingButtonState
+                    ) {
+                        Task {
+                            await model.checkButtonState()
+                            await automation.refreshWidgetSnapshot()
+                        }
                     }
                 }
 
-                Button {
-                    Task {
-                        await model.checkButtonState()
-                        await automation.refreshWidgetSnapshot()
-                    }
-                } label: {
-                    if model.isCheckingButtonState {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Text("Проверить статус дня")
-                    }
-                }
-                .disabled(model.isCheckingButtonState)
-
-                if let buttonStateText = model.buttonStateText {
-                    Text(buttonStateText)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .textSelection(.enabled)
-                }
-
-                Divider()
-
-                HStack {
-                    Button("Начать сейчас") {
+                VStack(spacing: 2) {
+                    MenuActionButton(
+                        title: "Начать сейчас",
+                        systemImage: "play.circle",
+                        tint: .green,
+                        isLoading: automation.isPerformingManualAction
+                    ) {
                         Task { await automation.performManualClick(isStart: true) }
                     }
-                    Button("Завершить сейчас") {
+                    MenuActionButton(
+                        title: "Завершить сейчас",
+                        systemImage: "stop.circle",
+                        tint: .red,
+                        isLoading: automation.isPerformingManualAction
+                    ) {
                         Task { await automation.performManualClick(isStart: false) }
                     }
-                }
-                .disabled(automation.isPerformingManualAction)
-
-                if automation.isPerformingManualAction {
-                    ProgressView().controlSize(.small)
-                } else if let manualActionText = automation.manualActionText {
-                    Text(manualActionText)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .textSelection(.enabled)
+                    if let manualActionText = automation.manualActionText {
+                        Text(manualActionText)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .textSelection(.enabled)
+                            .padding(.horizontal, 10)
+                    }
                 }
 
-                Divider()
-
-                Button("Настройки…") {
-                    openWindow(id: "settings")
-                }
-                Button("Выйти из аккаунта") {
-                    model.logout()
+                VStack(spacing: 2) {
+                    MenuActionButton(title: "Настройки…", systemImage: "gearshape") {
+                        openWindow(id: "settings")
+                    }
+                    MenuActionButton(title: "Выйти из аккаунта", systemImage: "person.crop.circle.badge.minus") {
+                        model.logout()
+                    }
                 }
             } else {
                 LoginView(model: model)
@@ -84,12 +95,12 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            Button("Выход") {
+            MenuActionButton(title: "Выход", systemImage: "xmark.circle") {
                 NSApplication.shared.terminate(nil)
             }
         }
-        .padding(12)
-        .frame(width: 260)
+        .padding(10)
+        .frame(width: 280)
         .task { await model.refresh() }
     }
 }

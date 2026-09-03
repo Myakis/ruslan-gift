@@ -5,8 +5,12 @@ struct LoginView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Вход в Wplan")
-                .font(.headline)
+            HStack {
+                Text("Вход в Wplan")
+                    .font(.headline)
+                Spacer()
+                VPNBadge(status: model.vpnStatus)
+            }
 
             TextField("Логин", text: $model.username)
                 .textFieldStyle(.roundedBorder)
@@ -25,20 +29,15 @@ struct LoginView: View {
                     .textSelection(.enabled)
             }
 
-            Button {
+            MenuActionButton(
+                title: "Войти",
+                systemImage: "arrow.right.circle",
+                tint: .green,
+                isLoading: model.isLoggingIn
+            ) {
                 Task { await model.login() }
-            } label: {
-                if model.isLoggingIn {
-                    ProgressView().controlSize(.small)
-                } else {
-                    Text("Войти")
-                }
             }
-            .disabled(model.isLoggingIn || model.username.isEmpty || model.password.isEmpty)
-
-            Text(model.vpnStatusText)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            .disabled(model.username.isEmpty || model.password.isEmpty)
         }
     }
 }
