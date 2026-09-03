@@ -27,6 +27,23 @@ struct MenuBarContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             if model.isLoggedIn {
+                HStack {
+                    Spacer()
+                    Button {
+                        Task {
+                            await model.refresh()
+                            await automation.refreshWidgetSnapshot()
+                        }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 11, weight: .medium))
+                            .frame(width: 22, height: 22)
+                            .background(Circle().fill(Color.primary.opacity(0.06)))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Обновить статус")
+                }
+
                 StatusCard(
                     eyebrow: "WPLAN · \(automation.isRunning ? "АВТО ВКЛ" : "АВТО ВЫКЛ")",
                     vpnStatus: model.vpnStatus,
@@ -36,12 +53,6 @@ struct MenuBarContentView: View {
                 )
 
                 VStack(spacing: 2) {
-                    MenuActionButton(title: "Обновить", systemImage: "arrow.clockwise") {
-                        Task {
-                            await model.refresh()
-                            await automation.refreshWidgetSnapshot()
-                        }
-                    }
                     MenuActionButton(
                         title: "Проверить статус дня",
                         systemImage: "checkmark.circle",
