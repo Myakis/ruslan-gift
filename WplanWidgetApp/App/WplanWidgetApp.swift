@@ -17,6 +17,6 @@ struct WplanWidgetApp: App {
             SettingsView(automation: automation)
         }
         .windowResizability(.contentSize)
-        .defaultSize(width: 340, height: 360)
+        .defaultSize(width: 340, height: 500)
     }
 }

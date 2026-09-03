@@ -54,7 +54,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 340)
+        .frame(width: 340, height: 500)
     }
 
     /// Bridges `ScheduleConfiguration`'s `ClockTime` (hour/minute only) to the `Date`
