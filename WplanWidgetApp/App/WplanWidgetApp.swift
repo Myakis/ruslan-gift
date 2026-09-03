@@ -6,8 +6,10 @@ struct WplanWidgetApp: App {
     @StateObject private var automation = AutomationController(appGroupIdentifier: MenuBarModel.appGroupIdentifier)
 
     var body: some Scene {
-        MenuBarExtra("Wplan", systemImage: "clock") {
+        MenuBarExtra {
             MenuBarContentView(model: model, automation: automation)
+        } label: {
+            MenuBarLabelView()
         }
         .menuBarExtraStyle(.window)
 
