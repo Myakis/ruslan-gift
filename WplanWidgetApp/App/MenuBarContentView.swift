@@ -56,20 +56,16 @@ struct MenuBarContentView: View {
 
                 VStack(spacing: 2) {
                     MenuActionButton(
-                        title: "Начать сейчас",
-                        systemImage: "play.circle",
-                        tint: .green,
+                        title: model.isRunningDay == true ? "Завершить" : "Начать",
+                        systemImage: model.isRunningDay == true ? "stop.circle" : "play.circle",
+                        tint: model.isRunningDay == true ? .red : .green,
                         isLoading: automation.isPerformingManualAction
                     ) {
-                        Task { await automation.performManualClick(isStart: true) }
-                    }
-                    MenuActionButton(
-                        title: "Завершить сейчас",
-                        systemImage: "stop.circle",
-                        tint: .red,
-                        isLoading: automation.isPerformingManualAction
-                    ) {
-                        Task { await automation.performManualClick(isStart: false) }
+                        let isStart = model.isRunningDay != true
+                        Task {
+                            await automation.performManualClick(isStart: isStart)
+                            await model.checkButtonState()
+                        }
                     }
                     if let manualActionText = automation.manualActionText {
                         Text(manualActionText)
@@ -101,6 +97,9 @@ struct MenuBarContentView: View {
         }
         .padding(10)
         .frame(width: 280)
-        .task { await model.refresh() }
+        .task {
+            await model.refresh()
+            if model.isLoggedIn { await model.checkButtonState() }
+        }
     }
 }
