@@ -91,7 +91,7 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            MenuActionButton(title: "Выход", systemImage: "xmark.circle") {
+            MenuActionButton(title: "Завершить Wplan", systemImage: "xmark.circle") {
                 NSApplication.shared.terminate(nil)
             }
         }
