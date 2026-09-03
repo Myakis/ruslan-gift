@@ -14,6 +14,7 @@ import WplanCore
 final class AutomationController: ObservableObject {
     private static let configurationKey = "scheduleConfiguration"
     private static let isRunningKey = "automationIsRunning"
+    private static let startedAtKey = "todayStartedAt"
     private static let widgetKind = "WplanRingWidget"
     private static let widgetRefreshInterval: TimeInterval = 5 * 60
 
@@ -66,6 +67,11 @@ final class AutomationController: ObservableObject {
             initialAgent.start()
         }
 
+        if let persistedStartedAt = defaults?.object(forKey: Self.startedAtKey) as? Date,
+           Calendar.current.isDateInToday(persistedStartedAt) {
+            Task { await initialAgent.seedStartedAt(persistedStartedAt) }
+        }
+
         startWidgetRefreshLoop()
     }
 
@@ -107,6 +113,9 @@ final class AutomationController: ObservableObject {
             isStart = WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier)?.isStart
         }
         let startedAt = await agent.currentStartedAt()
+        if let startedAt {
+            defaults?.set(startedAt, forKey: Self.startedAtKey)
+        }
         let scheduledFinishAt = await agent.currentScheduledFinishAt(now: now)
         WidgetSnapshotStore.save(
             WidgetSnapshot(
