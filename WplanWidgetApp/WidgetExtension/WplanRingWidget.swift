@@ -4,9 +4,11 @@ import WplanCore
 
 /// "Кольцо дня" (design doc `1a`) + VPN states (design doc `3a`), reading the real
 /// `WidgetSnapshot` the host app writes to the App Group container — see
-/// `AutomationController` for the write side. No worked-hours field: the Wplan API
-/// doesn't expose one (see WplanCore's foundation plan's Known Limitation), so this
-/// shows only the isStart/isFinished boolean state, not an elapsed-time ring fill.
+/// `AutomationController` for the write side. The progress ring/elapsed-total text
+/// come from `startedAt`/`scheduledFinishAt` (locally recorded + the configured
+/// schedule) — the Wplan API itself exposes no real worked-hours value (see
+/// WplanCore's foundation plan's Known Limitation), so this is an estimate, not a
+/// server-verified duration.
 private let appGroupIdentifier = "group.ru.itmo.wplanwidget"
 
 struct WplanRingProvider: TimelineProvider {
@@ -20,9 +22,12 @@ struct WplanRingProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WplanRingEntry>) -> Void) {
         let entry = currentEntry()
-        // The host app pushes a reload via WidgetCenter whenever it has fresher data;
-        // this policy is just a safety net in case that never fires.
-        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(15 * 60))))
+        // Refresh every minute while a day is running, so the elapsed/progress text
+        // keeps moving between the host app's own (much rarer) snapshot writes.
+        let nextRefresh = entry.snapshot?.startedAt != nil
+            ? Date().addingTimeInterval(60)
+            : Date().addingTimeInterval(15 * 60)
+        completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
     }
 
     private func currentEntry() -> WplanRingEntry {
@@ -46,6 +51,32 @@ struct WplanRingWidgetView: View {
     /// running); false means the day is running (next action is "finish").
     private var isRunning: Bool? {
         entry.snapshot?.isStart.map { !$0 }
+    }
+
+    /// `nil` when running but we have no locally-recorded start/finish to estimate
+    /// from (e.g. the day was started from the website itself, not this app).
+    private var progressFraction: Double? {
+        guard isRunning == true,
+              let startedAt = entry.snapshot?.startedAt,
+              let finishAt = entry.snapshot?.scheduledFinishAt,
+              finishAt > startedAt else { return nil }
+        let elapsed = entry.date.timeIntervalSince(startedAt)
+        let total = finishAt.timeIntervalSince(startedAt)
+        return min(max(elapsed / total, 0), 1)
+    }
+
+    private var elapsedOverTotalText: String? {
+        guard isRunning == true,
+              let startedAt = entry.snapshot?.startedAt,
+              let finishAt = entry.snapshot?.scheduledFinishAt else { return nil }
+        let elapsed = max(0, entry.date.timeIntervalSince(startedAt))
+        let total = finishAt.timeIntervalSince(startedAt)
+        return "\(Self.formatDuration(elapsed)) / \(Self.formatDuration(total))"
+    }
+
+    private static func formatDuration(_ interval: TimeInterval) -> String {
+        let totalMinutes = max(0, Int(interval / 60))
+        return "\(totalMinutes / 60):\(String(format: "%02d", totalMinutes % 60))"
     }
 
     private var ringColor: Color {
@@ -88,7 +119,12 @@ struct WplanRingWidgetView: View {
                 } else {
                     Circle()
                         .stroke(Color.secondary.opacity(0.15), lineWidth: 6)
-                    if vpnStatus == .connected && isRunning == true {
+                    if vpnStatus == .connected, isRunning == true, let fraction = progressFraction {
+                        Circle()
+                            .trim(from: 0, to: fraction)
+                            .stroke(ringColor, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                    } else if vpnStatus == .connected, isRunning == true {
                         Circle()
                             .stroke(ringColor, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     } else if vpnStatus == .connecting {
@@ -97,8 +133,13 @@ struct WplanRingWidgetView: View {
                             .stroke(ringColor, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     }
                 }
-                Image(systemName: iconName)
-                    .foregroundStyle(vpnStatus == .connected ? .secondary : ringColor)
+                if let elapsedOverTotalText {
+                    Text(elapsedOverTotalText)
+                        .font(.system(size: 13, weight: .medium))
+                } else {
+                    Image(systemName: iconName)
+                        .foregroundStyle(vpnStatus == .connected ? .secondary : ringColor)
+                }
             }
             .padding(6)
             Text(statusText)

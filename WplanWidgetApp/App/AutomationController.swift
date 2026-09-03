@@ -98,6 +98,7 @@ final class AutomationController: ObservableObject {
     /// falls back to whatever was last known if this particular fetch fails, rather
     /// than reporting a false "not started".
     func refreshWidgetSnapshot() async {
+        let now = Date()
         let vpnStatus = await vpnChecker.currentStatus()
         let isStart: Bool?
         if let state = try? await statusClient.fetchButtonState() {
@@ -105,8 +106,16 @@ final class AutomationController: ObservableObject {
         } else {
             isStart = WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier)?.isStart
         }
+        let startedAt = await agent.currentStartedAt()
+        let scheduledFinishAt = await agent.currentScheduledFinishAt(now: now)
         WidgetSnapshotStore.save(
-            WidgetSnapshot(isStart: isStart, vpnStatus: vpnStatus, updatedAt: Date()),
+            WidgetSnapshot(
+                isStart: isStart,
+                vpnStatus: vpnStatus,
+                startedAt: startedAt,
+                scheduledFinishAt: scheduledFinishAt,
+                updatedAt: now
+            ),
             appGroupIdentifier: appGroupIdentifier
         )
         WidgetCenter.shared.reloadTimelines(ofKind: Self.widgetKind)
