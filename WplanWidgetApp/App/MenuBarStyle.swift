@@ -44,13 +44,15 @@ struct VPNBadge: View {
     }
 }
 
-/// The top summary block: eyebrow label + VPN badge, status dot + headline, subtitle.
+/// The top summary block: eyebrow label + VPN badge, status dot + headline (with
+/// an optional trailing refresh icon), subtitle.
 struct StatusCard: View {
     let eyebrow: String
     let vpnStatus: VPNNetworkChecker.Status
     let dotColor: Color
     let headline: String
     let subtitle: String?
+    var onRefresh: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -65,6 +67,17 @@ struct StatusCard: View {
                 Circle().fill(dotColor).frame(width: 7, height: 7)
                 Text(headline)
                     .font(.system(size: 14, weight: .semibold))
+                if let onRefresh {
+                    Spacer()
+                    Button(action: onRefresh) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 10, weight: .medium))
+                            .frame(width: 20, height: 20)
+                            .background(Circle().fill(Color.primary.opacity(0.08)))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Обновить статус")
+                }
             }
             if let subtitle {
                 Text(subtitle)
