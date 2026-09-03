@@ -45,6 +45,16 @@ public final class WplanAutomationAgent {
     public func updateConfiguration(_ configuration: ScheduleConfiguration) async {
         await scheduler.updateConfiguration(configuration)
     }
+
+    /// For the widget snapshot writer — see `AutoclickScheduler.currentStartedAt()`.
+    public func currentStartedAt() async -> Date? {
+        await scheduler.currentStartedAt()
+    }
+
+    /// For the widget snapshot writer — see `AutoclickScheduler.currentScheduledFinishAt(now:)`.
+    public func currentScheduledFinishAt(now: Date) async -> Date? {
+        await scheduler.currentScheduledFinishAt(now: now)
+    }
 }
 
 /// Composition root: builds the full WplanCore stack (session, client, VPN check,

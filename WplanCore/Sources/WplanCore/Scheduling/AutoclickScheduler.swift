@@ -32,6 +32,20 @@ public actor AutoclickScheduler {
         self.configuration = configuration
     }
 
+    /// When today's start click (automatic or manual) actually happened, if at all —
+    /// lets a caller (the widget snapshot writer) show progress toward the scheduled
+    /// finish without needing a real "hours worked" value from the Wplan API.
+    public func currentStartedAt() -> Date? {
+        dayState.startPerformedAt
+    }
+
+    /// The scheduled finish instant for today, given the current configuration and
+    /// (if `autoCalculateEightHours` is on) today's recorded start — `nil` if there's
+    /// nothing to compute from yet (8h mode, no start recorded this process).
+    public func currentScheduledFinishAt(now: Date) -> Date? {
+        effectiveFinishTime(now: now)
+    }
+
     public func tick(now: Date) async -> AutoclickTickResult {
         dayState.resetIfNewDay(now: now, calendar: calendar)
 
