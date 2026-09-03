@@ -40,38 +40,41 @@ struct MenuBarLabelView: View {
         status.snapshot?.isStart.map { !$0 }
     }
 
-    private var dotColor: Color {
-        switch vpnStatus {
-        case .disconnected: return .red
-        case .connecting: return .orange
-        case .connected: return isRunning == true ? .green : .secondary
-        }
-    }
-
     private var elapsedText: String? {
         guard vpnStatus == .connected, isRunning == true, let startedAt = status.snapshot?.startedAt else { return nil }
         let elapsedMinutes = max(0, Int(status.now.timeIntervalSince(startedAt) / 60))
         return "\(elapsedMinutes / 60):\(String(format: "%02d", elapsedMinutes % 60))"
     }
 
-    private var iconName: String {
+    /// The brand icon carries its own (always-green) dot, so it only needs an
+    /// overlay badge when something's actually worth flagging — a clean VPN
+    /// connection doesn't need decoration.
+    private var alertBadgeColor: Color? {
         switch vpnStatus {
-        case .disconnected: return "wifi.slash"
-        case .connecting: return "arrow.triangle.2.circlepath"
-        case .connected: return isRunning == true ? "checkmark.circle" : "clock"
+        case .disconnected: return .red
+        case .connecting: return .orange
+        case .connected: return nil
         }
     }
 
     var body: some View {
         HStack(spacing: 4) {
-            Circle()
-                .fill(dotColor)
-                .frame(width: 6, height: 6)
+            Image("MenuBarIcon")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 18, height: 18)
+                .opacity(vpnStatus == .disconnected ? 0.5 : 1)
+                .overlay(alignment: .topTrailing) {
+                    if let alertBadgeColor {
+                        Circle()
+                            .fill(alertBadgeColor)
+                            .frame(width: 6, height: 6)
+                            .offset(x: 2, y: -2)
+                    }
+                }
             if let elapsedText {
                 Text(elapsedText)
                     .font(.system(.body, design: .monospaced))
-            } else {
-                Image(systemName: iconName)
             }
         }
     }
