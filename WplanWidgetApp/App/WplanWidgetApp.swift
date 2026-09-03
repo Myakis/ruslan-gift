@@ -16,5 +16,6 @@ struct WplanWidgetApp: App {
         Window("Настройки Wplan", id: "settings") {
             SettingsView(automation: automation)
         }
+        .windowResizability(.contentSize)
     }
 }
