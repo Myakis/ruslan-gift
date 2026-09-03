@@ -1,6 +1,8 @@
 {
   "images" : [
-    { "filename" : "wplan-logo-7c-icon.png", "idiom" : "universal", "scale" : "1x" }
+    { "filename" : "menubar_18x18.png", "idiom" : "universal", "scale" : "1x" },
+    { "filename" : "menubar_36x36.png", "idiom" : "universal", "scale" : "2x" },
+    { "filename" : "menubar_54x54.png", "idiom" : "universal", "scale" : "3x" }
   ],
   "properties" : {
     "template-rendering-intent" : "original"

@@ -61,9 +61,6 @@ struct MenuBarLabelView: View {
         HStack(spacing: 4) {
             Image("MenuBarIcon")
                 .renderingMode(.original)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 18, height: 18)
                 .opacity(vpnStatus == .disconnected ? 0.5 : 1)
                 .overlay(alignment: .topTrailing) {
                     if let alertBadgeColor {
