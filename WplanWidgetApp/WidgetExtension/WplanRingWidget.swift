@@ -170,7 +170,7 @@ struct WplanRingWidgetView: View {
 
     private var compactBody: some View {
         VStack(spacing: 4) {
-            Text("ITMO")
+            Text("WPLAN")
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
                 .foregroundStyle(.secondary)
             ring(diameter: 74, lineWidth: 6) {
@@ -218,7 +218,7 @@ struct WplanRingWidgetView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("ITMO")
+                    Text("WPLAN")
                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                         .foregroundStyle(.secondary)
                     Spacer()
