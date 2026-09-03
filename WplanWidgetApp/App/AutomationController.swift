@@ -15,6 +15,7 @@ final class AutomationController: ObservableObject {
     private static let configurationKey = "scheduleConfiguration"
     private static let isRunningKey = "automationIsRunning"
     private static let startedAtKey = "todayStartedAt"
+    private static let finishedAtKey = "todayFinishedAt"
     private static let widgetKind = "WplanRingWidget"
     private static let widgetRefreshInterval: TimeInterval = 5 * 60
 
@@ -63,13 +64,24 @@ final class AutomationController: ObservableObject {
         statusClient = WplanClient(session: WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier))
         let shouldRun = defaults?.bool(forKey: Self.isRunningKey) ?? false
         isRunning = shouldRun
-        if shouldRun {
-            initialAgent.start()
-        }
 
-        if let persistedStartedAt = defaults?.object(forKey: Self.startedAtKey) as? Date,
-           Calendar.current.isDateInToday(persistedStartedAt) {
-            Task { await initialAgent.seedStartedAt(persistedStartedAt) }
+        // Seeding must complete *before* the tick loop's first iteration, or a
+        // fresh launch can race its own restored state and re-click start right
+        // after finishing (see the finish-persistence fix's commit for the bug
+        // this raced into once already). Both seeds and the conditional start()
+        // are sequenced in one Task so that can't happen.
+        let persistedStartedAt = defaults?.object(forKey: Self.startedAtKey) as? Date
+        let persistedFinishedAt = defaults?.object(forKey: Self.finishedAtKey) as? Date
+        Task {
+            if let persistedStartedAt, Calendar.current.isDateInToday(persistedStartedAt) {
+                await initialAgent.seedStartedAt(persistedStartedAt)
+            }
+            if let persistedFinishedAt, Calendar.current.isDateInToday(persistedFinishedAt) {
+                await initialAgent.seedFinishedAt(persistedFinishedAt)
+            }
+            if shouldRun {
+                initialAgent.start()
+            }
         }
 
         startWidgetRefreshLoop()
@@ -123,6 +135,9 @@ final class AutomationController: ObservableObject {
         let startedAt = await agent.currentStartedAt()
         if let startedAt {
             defaults?.set(startedAt, forKey: Self.startedAtKey)
+        }
+        if let finishedAt = await agent.currentFinishedAt() {
+            defaults?.set(finishedAt, forKey: Self.finishedAtKey)
         }
         let scheduledFinishAt = await agent.currentScheduledFinishAt(now: now)
         WidgetSnapshotStore.save(
