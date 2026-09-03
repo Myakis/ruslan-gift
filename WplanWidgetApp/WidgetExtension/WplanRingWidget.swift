@@ -65,13 +65,25 @@ struct WplanRingWidgetView: View {
         return min(max(elapsed / total, 0), 1)
     }
 
-    private var elapsedOverTotalText: String? {
-        guard isRunning == true,
-              let startedAt = entry.snapshot?.startedAt,
+    /// Clock times at the ring's center — "08:14–16:14" — instead of a duration.
+    private var startEndText: String? {
+        guard let startedAt = entry.snapshot?.startedAt,
               let finishAt = entry.snapshot?.scheduledFinishAt else { return nil }
+        return "\(Self.formatClock(startedAt))–\(Self.formatClock(finishAt))"
+    }
+
+    /// How long the day has been running, shown below the ring instead of inside it.
+    private var elapsedText: String? {
+        guard isRunning == true, let startedAt = entry.snapshot?.startedAt else { return nil }
         let elapsed = max(0, entry.date.timeIntervalSince(startedAt))
-        let total = finishAt.timeIntervalSince(startedAt)
-        return "\(Self.formatDuration(elapsed)) / \(Self.formatDuration(total))"
+        return "Прошло: \(Self.formatDuration(elapsed))"
+    }
+
+    private static func formatClock(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: date)
     }
 
     private static func formatDuration(_ interval: TimeInterval) -> String {
@@ -133,18 +145,25 @@ struct WplanRingWidgetView: View {
                             .stroke(ringColor, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     }
                 }
-                if let elapsedOverTotalText {
-                    Text(elapsedOverTotalText)
-                        .font(.system(size: 13, weight: .medium))
+                if let startEndText {
+                    Text(startEndText)
+                        .font(.system(size: 11, weight: .medium))
+                        .minimumScaleFactor(0.7)
                 } else {
                     Image(systemName: iconName)
                         .foregroundStyle(vpnStatus == .connected ? .secondary : ringColor)
                 }
             }
             .padding(6)
-            Text(statusText)
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
+            if let elapsedText {
+                Text(elapsedText)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(statusText)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
             if !updatedText.isEmpty {
                 Text(updatedText)
                     .font(.system(size: 8))

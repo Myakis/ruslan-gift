@@ -23,7 +23,7 @@ targets:
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: "Приложению нужен доступ к корпоративной сети, чтобы обращаться к Wplan через VPN."
         CODE_SIGN_STYLE: Automatic
         MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: "3"
+        CURRENT_PROJECT_VERSION: "4"
         ENABLE_HARDENED_RUNTIME: YES
         SWIFT_VERSION: "5.0"
     dependencies:
@@ -51,7 +51,7 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         CODE_SIGN_STYLE: Automatic
         MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: "3"
+        CURRENT_PROJECT_VERSION: "4"
         ENABLE_HARDENED_RUNTIME: YES
         SWIFT_VERSION: "5.0"
         SKIP_INSTALL: YES
