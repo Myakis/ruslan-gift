@@ -40,6 +40,7 @@ final class MenuBarModel: ObservableObject {
             loginErrorMessage = "Введите логин и пароль"
             return
         }
+        username = Self.normalizeUsername(username)
         isLoggingIn = true
         loginErrorMessage = nil
         defer { isLoggingIn = false }
@@ -52,6 +53,14 @@ final class MenuBarModel: ObservableObject {
         } catch {
             loginErrorMessage = "Не удалось войти: \(describeWplanError(error))"
         }
+    }
+
+    /// Bare usernames (no domain) are typed most often — "test.t" is treated as
+    /// short for the corporate login "test.t@office.lan". Any input that already
+    /// has an "@" is left alone (someone using a different domain deliberately).
+    private static func normalizeUsername(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.contains("@") ? trimmed : "\(trimmed)@office.lan"
     }
 
     func logout() {
