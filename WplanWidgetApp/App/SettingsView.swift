@@ -16,14 +16,6 @@ struct SettingsView: View {
                     set: { automation.setRunning($0) }
                 ))
 
-                Toggle("Авто начало дня", isOn: Binding(
-                    get: { automation.configuration.autoStartEnabled },
-                    set: { automation.configuration.autoStartEnabled = $0 }
-                ))
-                Toggle("Авто завершение дня", isOn: Binding(
-                    get: { automation.configuration.autoFinishEnabled },
-                    set: { automation.configuration.autoFinishEnabled = $0 }
-                ))
                 Toggle("Авто расчёт 8 часов от начала", isOn: Binding(
                     get: { automation.configuration.autoCalculateEightHours },
                     set: { automation.configuration.autoCalculateEightHours = $0 }

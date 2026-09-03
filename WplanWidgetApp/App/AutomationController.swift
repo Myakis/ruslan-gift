@@ -48,8 +48,8 @@ final class AutomationController: ObservableObject {
             initialConfiguration = decoded
         } else {
             initialConfiguration = ScheduleConfiguration(
-                autoStartEnabled: false,
-                autoFinishEnabled: false,
+                autoStartEnabled: true,
+                autoFinishEnabled: true,
                 startTime: ClockTime(hour: 9, minute: 0),
                 endTime: ClockTime(hour: 18, minute: 0),
                 autoCalculateEightHours: false,
@@ -75,10 +75,18 @@ final class AutomationController: ObservableObject {
         startWidgetRefreshLoop()
     }
 
+    /// "Включить автоматические клики" is the only automation switch exposed in
+    /// Settings — it implies both start and finish, so turning it on also forces
+    /// both flags on (covers configs persisted before this UI simplification, which
+    /// could have either flag off).
     func setRunning(_ running: Bool) {
         isRunning = running
         defaults?.set(running, forKey: Self.isRunningKey)
         if running {
+            if !configuration.autoStartEnabled || !configuration.autoFinishEnabled {
+                configuration.autoStartEnabled = true
+                configuration.autoFinishEnabled = true
+            }
             agent.start()
         } else {
             agent.stop()
