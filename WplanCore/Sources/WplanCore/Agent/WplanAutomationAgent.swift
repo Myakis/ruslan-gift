@@ -61,6 +61,17 @@ public final class WplanAutomationAgent {
     public func seedStartedAt(_ date: Date) async {
         await scheduler.seedStartedAt(date, now: Date())
     }
+
+    /// For the widget snapshot writer — see `AutoclickScheduler.currentFinishedAt()`.
+    public func currentFinishedAt() async -> Date? {
+        await scheduler.currentFinishedAt()
+    }
+
+    /// Restores a finish timestamp persisted by a previous process — see
+    /// `AutoclickScheduler.seedFinishedAt(_:now:)`.
+    public func seedFinishedAt(_ date: Date) async {
+        await scheduler.seedFinishedAt(date, now: Date())
+    }
 }
 
 /// Composition root: builds the full WplanCore stack (session, client, VPN check,

@@ -56,6 +56,23 @@ public actor AutoclickScheduler {
         dayState.recordStartPerformed(at: date)
     }
 
+    /// When today's day was finished, if at all — see `DayState.finishPerformedAt`.
+    public func currentFinishedAt() -> Date? {
+        dayState.finishPerformedAt
+    }
+
+    /// Restores a finish timestamp recorded by a *previous process*, and — same as
+    /// the original recording — suppresses further automatic start clicks today.
+    /// A no-op if `date` isn't within today's calendar day. Without this, a
+    /// relaunch after finishing (later the same day, still within active hours)
+    /// would re-click start: the server's "not started" button state can't tell
+    /// "never started today" apart from "already finished today".
+    public func seedFinishedAt(_ date: Date, now: Date) {
+        dayState.resetIfNewDay(now: now, calendar: calendar)
+        guard calendar.isDate(date, inSameDayAs: now) else { return }
+        dayState.recordFinishPerformed(at: date)
+    }
+
     public func tick(now: Date) async -> AutoclickTickResult {
         dayState.resetIfNewDay(now: now, calendar: calendar)
 
@@ -66,6 +83,7 @@ public actor AutoclickScheduler {
         var startResult: AutoclickTickResult?
         if configuration.autoStartEnabled,
            !dayState.startHandledManually,
+           !dayState.autoStartSuppressedToday,
            let startAt = configuration.startTime.date(onDayOf: now, calendar: calendar),
            now >= startAt {
             let result = await performIfNeeded(isStart: true, now: now)
@@ -94,6 +112,7 @@ public actor AutoclickScheduler {
             dayState.markStartHandled(at: now)
         } else {
             dayState.markFinishHandled()
+            dayState.recordFinishPerformed(at: now)
         }
     }
 
@@ -117,6 +136,7 @@ public actor AutoclickScheduler {
         }
 
         guard state.isStart == isStart else {
+            if !isStart { dayState.recordFinishPerformed(at: now) }
             return .alreadyInDesiredState(isStart: isStart)
         }
 
@@ -128,6 +148,8 @@ public actor AutoclickScheduler {
 
         if isStart {
             dayState.recordStartPerformed(at: now)
+        } else {
+            dayState.recordFinishPerformed(at: now)
         }
         return .clicked(isStart: isStart)
     }

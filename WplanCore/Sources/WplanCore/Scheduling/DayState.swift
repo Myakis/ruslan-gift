@@ -5,6 +5,16 @@ public struct DayState {
     public private(set) var startHandledManually: Bool = false
     public private(set) var finishHandledManually: Bool = false
     public private(set) var startPerformedAt: Date?
+    public private(set) var finishPerformedAt: Date?
+    /// True once today's cycle has reached "finished" — via an automatic click, a
+    /// manual click, or discovering the server already showed it finished. Blocks
+    /// the *automatic* start branch from firing again today, without touching
+    /// `startPerformedAt` (which must keep reflecting the real start time for the
+    /// progress-ring calculation). Needed because the Wplan API's "not started"
+    /// button state is indistinguishable between "never started today" and
+    /// "already finished today" — a relaunched process has no other way to tell
+    /// the two apart, and would otherwise re-click start after every finish.
+    public private(set) var autoStartSuppressedToday = false
 
     public init(calendarDay: Date, calendar: Calendar) {
         self.calendarDay = calendar.startOfDay(for: calendarDay)
@@ -27,6 +37,15 @@ public struct DayState {
         finishHandledManually = true
     }
 
+    /// Records that today's day has reached "finished" — automatically or
+    /// manually, or discovered already-finished on the server. See
+    /// `autoStartSuppressedToday`'s doc comment for why this also suppresses
+    /// automatic starts for the rest of the day.
+    public mutating func recordFinishPerformed(at date: Date) {
+        finishPerformedAt = date
+        autoStartSuppressedToday = true
+    }
+
     public mutating func resetIfNewDay(now: Date, calendar: Calendar) {
         let today = calendar.startOfDay(for: now)
         guard today != calendarDay else { return }
@@ -34,5 +53,7 @@ public struct DayState {
         startHandledManually = false
         finishHandledManually = false
         startPerformedAt = nil
+        finishPerformedAt = nil
+        autoStartSuppressedToday = false
     }
 }
