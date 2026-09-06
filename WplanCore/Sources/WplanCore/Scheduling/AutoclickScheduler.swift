@@ -73,6 +73,13 @@ public actor AutoclickScheduler {
         dayState.recordFinishPerformed(at: date)
     }
 
+    /// See `DayState.resetForToday()` — lets the user deliberately re-arm today's
+    /// automatic start/finish cycle instead of waiting for the calendar day to roll
+    /// over.
+    public func resetDayStateForToday() {
+        dayState.resetForToday()
+    }
+
     public func tick(now: Date) async -> AutoclickTickResult {
         dayState.resetIfNewDay(now: now, calendar: calendar)
 

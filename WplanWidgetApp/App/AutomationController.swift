@@ -18,6 +18,8 @@ final class AutomationController: ObservableObject {
     private static let finishedAtKey = "todayFinishedAt"
     private static let widgetKind = "WplanRingWidget"
     private static let widgetRefreshInterval: TimeInterval = 5 * 60
+    private static let lastHandledResetRequestKey = "lastHandledWidgetResetRequestAt"
+    private static let resetRequestPollInterval: TimeInterval = 5
 
     @Published var configuration: ScheduleConfiguration {
         didSet {
@@ -37,6 +39,7 @@ final class AutomationController: ObservableObject {
     private let statusClient: WplanClient
     private let vpnChecker = VPNNetworkChecker()
     private var widgetRefreshTask: Task<Void, Never>?
+    private var resetRequestPollTask: Task<Void, Never>?
 
     init(appGroupIdentifier: String) {
         self.appGroupIdentifier = appGroupIdentifier
@@ -85,6 +88,7 @@ final class AutomationController: ObservableObject {
         }
 
         startWidgetRefreshLoop()
+        startResetRequestPollLoop()
     }
 
     /// "Включить автоматические клики" is the only automation switch exposed in
@@ -103,6 +107,19 @@ final class AutomationController: ObservableObject {
         } else {
             agent.stop()
         }
+    }
+
+    /// Clears today's start/finish bookkeeping (including the guard that blocks a
+    /// second automatic start after a finish — see `DayState.autoStartSuppressedToday`)
+    /// so the user can deliberately re-run the full automatic cycle again today,
+    /// instead of waiting for the calendar day to roll over. Wired to a Settings
+    /// action, not exposed as part of the normal automation flow.
+    func resetDayState() async {
+        await agent.resetDayStateForToday()
+        defaults?.removeObject(forKey: Self.startedAtKey)
+        defaults?.removeObject(forKey: Self.finishedAtKey)
+        manualActionText = "Состояние дня сброшено"
+        await refreshWidgetSnapshot()
     }
 
     func performManualClick(isStart: Bool) async {
@@ -125,6 +142,24 @@ final class AutomationController: ObservableObject {
     /// than reporting a false "not started".
     func refreshWidgetSnapshot() async {
         let now = Date()
+        guard configuration.activeWeekdays.contains(Calendar.current.component(.weekday, from: now)) else {
+            // Rest day per the schedule — skip the VPN/Wplan round trip entirely
+            // and just tell the widget to show "Выходной".
+            WidgetSnapshotStore.save(
+                WidgetSnapshot(
+                    isStart: nil,
+                    vpnStatus: .disconnected,
+                    startedAt: nil,
+                    scheduledFinishAt: nil,
+                    finishedAt: nil,
+                    isRestDay: true,
+                    updatedAt: now
+                ),
+                appGroupIdentifier: appGroupIdentifier
+            )
+            WidgetCenter.shared.reloadTimelines(ofKind: Self.widgetKind)
+            return
+        }
         let vpnStatus = await vpnChecker.currentStatus()
         let isStart: Bool?
         if let state = try? await statusClient.fetchButtonState() {
@@ -136,7 +171,8 @@ final class AutomationController: ObservableObject {
         if let startedAt {
             defaults?.set(startedAt, forKey: Self.startedAtKey)
         }
-        if let finishedAt = await agent.currentFinishedAt() {
+        let finishedAt = await agent.currentFinishedAt()
+        if let finishedAt {
             defaults?.set(finishedAt, forKey: Self.finishedAtKey)
         }
         let scheduledFinishAt = await agent.currentScheduledFinishAt(now: now)
@@ -146,6 +182,7 @@ final class AutomationController: ObservableObject {
                 vpnStatus: vpnStatus,
                 startedAt: startedAt,
                 scheduledFinishAt: scheduledFinishAt,
+                finishedAt: finishedAt,
                 updatedAt: now
             ),
             appGroupIdentifier: appGroupIdentifier
@@ -160,6 +197,28 @@ final class AutomationController: ObservableObject {
                 try? await Task.sleep(nanoseconds: UInt64(Self.widgetRefreshInterval * 1_000_000_000))
             }
         }
+    }
+
+    /// The widget extension can't reach the host app's live `AutoclickScheduler`
+    /// directly (separate process) — its reset button just leaves a timestamp in
+    /// the App Group container via `WidgetResetRequestStore`. This loop is the
+    /// side that actually applies it, polling far more often than the network-heavy
+    /// `widgetRefreshTask` since it only touches local UserDefaults.
+    private func startResetRequestPollLoop() {
+        resetRequestPollTask = Task { [weak self] in
+            while let self, !Task.isCancelled {
+                await self.applyPendingResetRequestIfAny()
+                try? await Task.sleep(nanoseconds: UInt64(Self.resetRequestPollInterval * 1_000_000_000))
+            }
+        }
+    }
+
+    private func applyPendingResetRequestIfAny() async {
+        guard let requestedAt = WidgetResetRequestStore.pendingRequestAt(appGroupIdentifier: appGroupIdentifier),
+              requestedAt > (defaults?.object(forKey: Self.lastHandledResetRequestKey) as? Date ?? .distantPast)
+        else { return }
+        defaults?.set(requestedAt, forKey: Self.lastHandledResetRequestKey)
+        await resetDayState()
     }
 
     private func persistConfiguration() {

@@ -72,6 +72,11 @@ public final class WplanAutomationAgent {
     public func seedFinishedAt(_ date: Date) async {
         await scheduler.seedFinishedAt(date, now: Date())
     }
+
+    /// See `AutoclickScheduler.resetDayStateForToday()`.
+    public func resetDayStateForToday() async {
+        await scheduler.resetDayStateForToday()
+    }
 }
 
 /// Composition root: builds the full WplanCore stack (session, client, VPN check,

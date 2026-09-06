@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -20,6 +20,7 @@
 		B02E807E9499FB76E85E897E /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7FA94C3443775B0BC394BD /* LaunchAtLogin.swift */; };
 		D46455CB38FA508CB1A8D4D6 /* AutomationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D98A3923ABE0E24FACDEAB /* AutomationController.swift */; };
 		D73ABAC6E799B7782A12BD0A /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB5A749150ECB79F891593B /* MenuBarLabelView.swift */; };
+		DCC95B544E627FAD7CA7B8C8 /* ResetDayIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30E0DA1714D005673D2E7D87 /* ResetDayIntent.swift */; };
 		DE9351B2B3570879FB6A6686 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 591405AA263958E98DAA5FFB /* Assets.xcassets */; };
 		E9E0DE790F5E32A1C145F3C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7197FE8E362B255F06490F7 /* WidgetKit.framework */; };
 		F50CCD5AAA3231B372E39598 /* ErrorDescribing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426BDA42D5AE4B758182E113 /* ErrorDescribing.swift */; };
@@ -57,6 +58,7 @@
 		1CB5A749150ECB79F891593B /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
 		1CC0D7DC0BF1BF554F662C29 /* WplanWidgetApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WplanWidgetApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C5E55EAC206DC9DB9BE426E /* WplanRingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WplanRingWidget.swift; sourceTree = "<group>"; };
+		30E0DA1714D005673D2E7D87 /* ResetDayIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetDayIntent.swift; sourceTree = "<group>"; };
 		3C7FA94C3443775B0BC394BD /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
 		426BDA42D5AE4B758182E113 /* ErrorDescribing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDescribing.swift; sourceTree = "<group>"; };
 		591405AA263958E98DAA5FFB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				BDE7CE3149A4E896C6305635 /* Info.plist */,
+				30E0DA1714D005673D2E7D87 /* ResetDayIntent.swift */,
 				2C5E55EAC206DC9DB9BE426E /* WplanRingWidget.swift */,
 				AC8BF008F89ABEB8B6138E3D /* WplanWidgetExtension.entitlements */,
 			);
@@ -227,6 +230,7 @@
 				};
 			};
 			buildConfigurationList = 4878D72447EC23ADAD20DD4F /* Build configuration list for PBXProject "WplanWidgetApp" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -234,12 +238,9 @@
 				en,
 			);
 			mainGroup = CA065E7F339A6CF61C3A9BA7;
-			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				AD8BE70AA6F1F811B7EAD707 /* XCLocalSwiftPackageReference "../WplanCore" */,
 			);
-			preferredProjectObjectVersion = 77;
-			productRefGroup = 2EA8B6A2B9F5E64D51624D79 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -265,6 +266,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCC95B544E627FAD7CA7B8C8 /* ResetDayIntent.swift in Sources */,
 				1A1277030D0F69F1630A0638 /* WplanRingWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -303,7 +305,7 @@
 				CODE_SIGN_ENTITLEMENTS = WidgetExtension/WplanWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -328,7 +330,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/WplanWidgetApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -353,7 +355,7 @@
 				CODE_SIGN_ENTITLEMENTS = WidgetExtension/WplanWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -378,7 +380,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/WplanWidgetApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;

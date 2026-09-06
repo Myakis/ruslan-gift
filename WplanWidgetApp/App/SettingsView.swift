@@ -63,6 +63,13 @@ struct SettingsView: View {
                         get: { automation.configuration.autoCalculateEightHours },
                         set: { automation.configuration.autoCalculateEightHours = $0 }
                     ))
+                    Button("Сбросить состояние дня") {
+                        Task { await automation.resetDayState() }
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(.secondary)
+                    .help("Позволяет ещё раз запустить автоматический старт/финиш сегодня, не дожидаясь полуночи")
                 }
 
                 sectionBlock(title: "Время") {

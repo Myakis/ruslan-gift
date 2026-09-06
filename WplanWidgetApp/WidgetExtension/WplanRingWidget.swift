@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
 import WplanCore
 
 /// "Кольцо дня" (design doc `1a`) + VPN states (design doc `3a`), reading the real
@@ -44,6 +45,22 @@ struct WplanRingWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: WplanRingEntry
 
+    /// `false` only for the gallery placeholder / a fresh install that has never
+    /// written a snapshot yet — distinct from a real, confirmed VPN-disconnected
+    /// reading, which also has `snapshot != nil`. Without this, both cases render
+    /// identically red, which reads as "something is broken" even when nothing
+    /// has actually been checked yet.
+    private var hasData: Bool {
+        entry.snapshot != nil
+    }
+
+    /// Today isn't in the configured schedule — the host app skips the VPN/Wplan
+    /// check entirely on such days (see `AutomationController.refreshWidgetSnapshot`),
+    /// so this takes priority over every other state below.
+    private var isRestDay: Bool {
+        entry.snapshot?.isRestDay ?? false
+    }
+
     private var vpnStatus: VPNNetworkChecker.Status {
         entry.snapshot?.vpnStatus ?? .disconnected
     }
@@ -52,6 +69,14 @@ struct WplanRingWidgetView: View {
     /// running); false means the day is running (next action is "finish").
     private var isRunning: Bool? {
         entry.snapshot?.isStart.map { !$0 }
+    }
+
+    /// The Wplan API's own button state can't tell "never started today" apart
+    /// from "already finished today" — `finishedAt` is our own reliable signal
+    /// for the latter (see `DayState.autoStartSuppressedToday`).
+    private var isFinished: Bool {
+        guard isRunning == false, let finishedAt = entry.snapshot?.finishedAt else { return false }
+        return Calendar.current.isDateInToday(finishedAt)
     }
 
     /// `nil` when running but we have no locally-recorded start/finish to estimate
@@ -88,6 +113,15 @@ struct WplanRingWidgetView: View {
         return Self.formatDuration(elapsed)
     }
 
+    /// The actual configured span (start → scheduled finish) — not hardcoded to
+    /// 8h, since `autoCalculateEightHours` off lets the user pick any duration.
+    private var totalDurationText: String? {
+        guard let startedAt = entry.snapshot?.startedAt,
+              let finishAt = entry.snapshot?.scheduledFinishAt,
+              finishAt > startedAt else { return nil }
+        return Self.formatDuration(finishAt.timeIntervalSince(startedAt))
+    }
+
     private static func formatClock(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
@@ -101,18 +135,25 @@ struct WplanRingWidgetView: View {
     }
 
     private var ringColor: Color {
+        guard !isRestDay else { return .secondary }
+        guard hasData else { return .secondary }
         switch vpnStatus {
         case .disconnected: return .red
         case .connecting: return .orange
-        case .connected: return isRunning == true ? .green : .secondary
+        case .connected:
+            if isRunning == true { return .green }
+            return isFinished ? .blue : .secondary
         }
     }
 
     private var statusText: String {
+        guard !isRestDay else { return "Выходной" }
+        guard hasData else { return "Нет данных" }
         switch vpnStatus {
         case .disconnected: return "VPN выкл."
         case .connecting: return "Подключение…"
         case .connected:
+            if isFinished { return "День завершён" }
             switch isRunning {
             case .some(true): return "День идёт"
             case .some(false): return "День не начат"
@@ -122,6 +163,8 @@ struct WplanRingWidgetView: View {
     }
 
     private var mediumHeadline: String {
+        guard !isRestDay else { return "Выходной" }
+        guard hasData else { return "Нет данных" }
         switch vpnStatus {
         case .disconnected: return "VPN не подключён"
         case .connecting: return "Подключение к VPN…"
@@ -130,6 +173,8 @@ struct WplanRingWidgetView: View {
     }
 
     private var mediumSubtitle: String? {
+        guard !isRestDay else { return "Сегодня не рабочий день по расписанию" }
+        guard hasData else { return "Откройте Wplan хотя бы раз, чтобы виджет начал получать данные" }
         switch vpnStatus {
         case .disconnected, .connecting:
             return "Включите VPN — клик выполнится сам"
@@ -147,10 +192,14 @@ struct WplanRingWidgetView: View {
     }
 
     private var iconName: String {
+        guard !isRestDay else { return "moon.zzz" }
+        guard hasData else { return "questionmark.circle" }
         switch vpnStatus {
         case .disconnected: return "wifi.slash"
         case .connecting: return "arrow.triangle.2.circlepath"
-        case .connected: return isRunning == true ? "checkmark" : "clock"
+        case .connected:
+            if isRunning == true { return "checkmark" }
+            return isFinished ? "checkmark.seal" : "clock"
         }
     }
 
@@ -193,7 +242,9 @@ struct WplanRingWidgetView: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }
-            if !updatedText.isEmpty {
+            if isFinished {
+                resetButton
+            } else if !updatedText.isEmpty {
                 Text(updatedText)
                     .font(.system(size: 8))
                     .foregroundStyle(.tertiary)
@@ -207,12 +258,18 @@ struct WplanRingWidgetView: View {
     private var mediumBody: some View {
         HStack(spacing: 16) {
             ring(diameter: 76, lineWidth: 7) {
-                VStack(spacing: 1) {
-                    Text(elapsedText ?? "—")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("из 8:00")
-                        .font(.system(size: 9))
+                if isRestDay {
+                    Image(systemName: iconName)
+                        .font(.system(size: 22))
                         .foregroundStyle(.secondary)
+                } else {
+                    VStack(spacing: 1) {
+                        Text(elapsedText ?? "—")
+                            .font(.system(size: 18, weight: .semibold))
+                        Text("из \(totalDurationText ?? "8:00")")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 
@@ -222,13 +279,15 @@ struct WplanRingWidgetView: View {
                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text("VPN")
-                        .font(.system(size: 9, weight: .semibold))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(ringColor.opacity(0.2))
-                        .foregroundStyle(ringColor)
-                        .clipShape(Capsule())
+                    if !isRestDay {
+                        Text("VPN")
+                            .font(.system(size: 9, weight: .semibold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(ringColor.opacity(0.2))
+                            .foregroundStyle(ringColor)
+                            .clipShape(Capsule())
+                    }
                 }
 
                 HStack(spacing: 6) {
@@ -241,6 +300,10 @@ struct WplanRingWidgetView: View {
                     Text(mediumSubtitle)
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
+                }
+
+                if isFinished {
+                    resetButton
                 }
 
                 if vpnStatus == .connected, let fraction = progressFraction {
@@ -275,12 +338,27 @@ struct WplanRingWidgetView: View {
         .padding()
     }
 
+    // MARK: - Reset button (isFinished only)
+
+    private var resetButton: some View {
+        Button(intent: ResetDayIntent()) {
+            Label("Начать заново", systemImage: "arrow.counterclockwise")
+                .font(.system(size: 10, weight: .medium))
+        }
+        .buttonStyle(.bordered)
+        .tint(.blue)
+        .controlSize(.mini)
+    }
+
     // MARK: - Shared ring
 
     @ViewBuilder
     private func ring(diameter: CGFloat, lineWidth: CGFloat, @ViewBuilder center: () -> some View) -> some View {
         ZStack {
-            if vpnStatus == .disconnected {
+            if isRestDay {
+                Circle()
+                    .stroke(Color.secondary.opacity(0.15), lineWidth: lineWidth)
+            } else if !hasData || vpnStatus == .disconnected {
                 Circle()
                     .stroke(ringColor.opacity(0.5), style: StrokeStyle(lineWidth: lineWidth, dash: [4, 4]))
             } else {

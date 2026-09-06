@@ -46,6 +46,18 @@ public struct DayState {
         autoStartSuppressedToday = true
     }
 
+    /// Manually clears today's bookkeeping without waiting for the calendar day to
+    /// roll over — lets the user deliberately re-run the full automatic cycle
+    /// (start + finish) more than once in the same day, e.g. after testing or
+    /// after a mistaken finish, overriding the `autoStartSuppressedToday` guard.
+    public mutating func resetForToday() {
+        startHandledManually = false
+        finishHandledManually = false
+        startPerformedAt = nil
+        finishPerformedAt = nil
+        autoStartSuppressedToday = false
+    }
+
     public mutating func resetIfNewDay(now: Date, calendar: Calendar) {
         let today = calendar.startOfDay(for: now)
         guard today != calendarDay else { return }
