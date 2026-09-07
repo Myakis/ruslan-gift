@@ -9,6 +9,13 @@ public final class WplanAutomationAgent {
     private let tickInterval: TimeInterval
     private var loopTask: Task<Void, Never>?
 
+    /// Fired synchronously after every tick with that tick's result — lets a
+    /// caller (the widget snapshot writer) react the instant an *automatic*
+    /// click actually goes out, instead of finding out up to `tickInterval` (or
+    /// the widget refresh loop's own, much longer interval) later. A manual click
+    /// doesn't need this — its caller already awaits `performManualClick` directly.
+    public var onTick: (@Sendable (AutoclickTickResult) -> Void)?
+
     public init(scheduler: AutoclickScheduler, tickInterval: TimeInterval = 30) {
         self.scheduler = scheduler
         self.tickInterval = tickInterval
@@ -19,9 +26,10 @@ public final class WplanAutomationAgent {
         guard loopTask == nil else { return }
         let scheduler = self.scheduler
         let interval = self.tickInterval
-        loopTask = Task {
+        loopTask = Task { [weak self] in
             while !Task.isCancelled {
-                _ = await scheduler.tick(now: Date())
+                let result = await scheduler.tick(now: Date())
+                self?.onTick?(result)
                 try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
             }
         }

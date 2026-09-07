@@ -87,6 +87,15 @@ final class AutomationController: ObservableObject {
             }
         }
 
+        // As soon as the scheduler's own timer fires an *automatic* click, refresh
+        // the widget right away instead of waiting for the (much less frequent)
+        // periodic loop below — that's the gap the user actually notices, since a
+        // manual click already refreshes immediately in `performManualClick`.
+        initialAgent.onTick = { [weak self] result in
+            guard case .clicked = result else { return }
+            Task { @MainActor in await self?.refreshWidgetSnapshot() }
+        }
+
         startWidgetRefreshLoop()
         startResetRequestPollLoop()
     }
