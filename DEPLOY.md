@@ -2,7 +2,7 @@
 
 ## Как устроено
 
-`.github/workflows/release.yml` — ручной workflow (`workflow_dispatch`).
+`.github/workflows/wplan-widget-release.yml` — ручной workflow (`workflow_dispatch`).
 Запускается из вкладки **Actions** на GitHub, на любой ветке (в том числе
 на `widget`, пока `main` не обновлён). По кнопке:
 
@@ -94,7 +94,7 @@ gh secret set MACOS_PROFILE_WIDGET_BASE64 < <(base64 -i ~/Library/Developer/Xcod
 ## Как выпустить релиз
 
 1. Обнови `CHANGELOG.md` — допиши в `[Unreleased]`, что изменилось.
-2. **Actions → Release → Run workflow** — выбери ветку, впиши тег (например
+2. **Actions → Wplan Widget Release → Run workflow** — выбери ветку, впиши тег (например
    `v1.3.0-widget`).
 3. Дождись зелёной галочки — в **Releases** появится тег с приложенным
    `Wplan-<тег>.dmg` и текстом из `[Unreleased]`.

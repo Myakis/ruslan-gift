@@ -29,7 +29,7 @@
   [XcodeGen](https://github.com/yonaskolb/XcodeGen) из `project.yml`):
   меню-бар приложение + WidgetKit-расширение.
 - **`scripts/build_dmg.sh`** — упаковка собранного `.app` в drag-to-Applications DMG.
-- **`.github/workflows/release.yml`** — ручной релизный пайплайн (см. ниже).
+- **`.github/workflows/wplan-widget-release.yml`** — ручной релизный пайплайн (см. ниже).
 
 ## Сборка локально
 
@@ -55,8 +55,8 @@ Gatekeeper при первом открытии; обход и все детал
 
 ## Релизы
 
-Собираются и публикуются на GitHub через workflow `Release`
-(`.github/workflows/release.yml`, запуск вручную из вкладки Actions) —
+Собираются и публикуются на GitHub через workflow `Wplan Widget Release`
+(`.github/workflows/wplan-widget-release.yml`, запуск вручную из вкладки Actions) —
 готовый DMG прикладывается к тегу. Подробная инструкция по разовой
 настройке и по каждому релизу — в [DEPLOY.md](DEPLOY.md), список изменений
 по версиям — в [CHANGELOG.md](CHANGELOG.md).
