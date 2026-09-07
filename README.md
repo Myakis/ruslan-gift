@@ -47,6 +47,37 @@ cd WplanCore
 swift test
 ```
 
+## Если хочешь собрать свою копию (свой Apple ID)
+
+Bundle ID и App Group в проекте (`com.wplanwidget.app`,
+`group.com.wplanwidget.app`) уже зарегистрированы под одним конкретным Apple
+ID — Apple требует их глобальной уникальности **на все аккаунты сразу**,
+даже для бесплатных Personal Team. Значит, если просто открыть проект в
+своём Xcode и выбрать свою команду, будет ошибка вида:
+
+> Failed Registering Bundle Identifier — The app identifier
+> "com.wplanwidget.app" cannot be registered to your development team
+> because it is not available.
+
+Чтобы собрать свою независимую копию — поменяй идентификаторы на
+уникальные (например, добавь своё имя) в трёх местах, прямо в Xcode
+(**Signing & Capabilities**):
+
+1. **Team** — выбери свою (нужен залогиненный в Xcode свой Apple ID:
+   Xcode → Settings → Accounts).
+2. **Bundle Identifier** таргета `WplanWidgetApp` — например
+   `com.wplanwidget.app.<твоё-имя>`.
+3. **Bundle Identifier** таргета `WplanWidgetExtension` (виджет) — в тон
+   первому, например `com.wplanwidget.app.<твоё-имя>.widget`.
+4. **App Groups** (у **обоих** таргетов) — убери `group.com.wplanwidget.app`
+   и добавь новую, но **одинаковую** у обоих таргетов, например
+   `group.com.wplanwidget.app.<твоё-имя>`. Без этого меню-бар приложение и
+   виджет перестанут видеть общие данные друг друга.
+
+После этого — **Try Again** на ошибке регистрации, дальше обычный Run.
+Эти изменения только для твоей локальной сборки, на оригинальный проект и
+чужие установки они не влияют.
+
 ## Ограничение без платного Apple Developer Program
 
 Сборки подписаны бесплатным сертификатом «Apple Development» — без
