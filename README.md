@@ -74,6 +74,16 @@ ID — Apple требует их глобальной уникальности *
    `group.com.wplanwidget.app.<твоё-имя>`. Без этого меню-бар приложение и
    виджет перестанут видеть общие данные друг друга.
 
+Как это выглядит в Xcode — таргет `WplanWidgetApp` (Team, Bundle Identifier,
+App Groups):
+
+![Signing & Capabilities для WplanWidgetApp](assets/1.png)
+
+И таргет `WplanWidgetExtension` (тот же Team, свой Bundle Identifier,
+**тот же** App Group):
+
+![Signing & Capabilities для WplanWidgetExtension](assets/2.png)
+
 После этого — **Try Again** на ошибке регистрации, дальше обычный Run.
 Эти изменения только для твоей локальной сборки, на оригинальный проект и
 чужие установки они не влияют.
