@@ -1,4 +1,4 @@
-name: Wplan Widget Release
+name: Release
 
 # Manual only — run from the Actions tab, on whichever branch you want to
 # release from (the current implementation branch included). Creates a git
