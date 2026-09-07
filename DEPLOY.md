@@ -2,7 +2,7 @@
 
 ## Как устроено
 
-`.github/workflows/release.yml` — ручной workflow (`workflow_dispatch`).
+`.github/workflows/wplan-widget-release.yml` — ручной workflow (`workflow_dispatch`).
 Запускается из вкладки **Actions** на GitHub, на любой ветке (в том числе
 на `widget`, пока `main` не обновлён). По кнопке:
 
