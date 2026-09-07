@@ -10,7 +10,7 @@ import WplanCore
 /// schedule) — the Wplan API itself exposes no real worked-hours value (see
 /// WplanCore's foundation plan's Known Limitation), so this is an estimate, not a
 /// server-verified duration.
-private let appGroupIdentifier = "group.ru.itmo.wplanwidget"
+private let appGroupIdentifier = "group.com.wplanwidget.app"
 
 struct WplanRingProvider: TimelineProvider {
     func placeholder(in context: Context) -> WplanRingEntry {

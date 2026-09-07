@@ -305,7 +305,7 @@
 				CODE_SIGN_ENTITLEMENTS = WidgetExtension/WplanWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -316,7 +316,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wplanwidget.app.widget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -330,7 +330,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/WplanWidgetApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -343,7 +343,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wplanwidget.app;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
@@ -355,7 +355,7 @@
 				CODE_SIGN_ENTITLEMENTS = WidgetExtension/WplanWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -366,7 +366,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wplanwidget.app.widget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -380,7 +380,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/WplanWidgetApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 8W787APH48;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -393,7 +393,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.itmo.wplanwidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wplanwidget.app;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};

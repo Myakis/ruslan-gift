@@ -2,7 +2,7 @@ import XCTest
 @testable import WplanCore
 
 final class KeychainStoreTests: XCTestCase {
-    private let store = KeychainStore(service: "ru.itmo.wplanwidget.tests.\(UUID().uuidString)")
+    private let store = KeychainStore(service: "com.wplanwidget.app.tests.\(UUID().uuidString)")
 
     override func tearDown() {
         try? store.delete()

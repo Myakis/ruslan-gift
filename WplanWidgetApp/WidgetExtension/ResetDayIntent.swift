@@ -12,7 +12,7 @@ struct ResetDayIntent: AppIntent {
     static var title: LocalizedStringResource = "Сбросить завершённый день"
     static var description = IntentDescription("Позволяет автоматике снова начать рабочий день сегодня.")
 
-    private let appGroupIdentifier = "group.ru.itmo.wplanwidget"
+    private let appGroupIdentifier = "group.com.wplanwidget.app"
 
     func perform() async throws -> some IntentResult {
         WidgetResetRequestStore.requestReset(appGroupIdentifier: appGroupIdentifier)

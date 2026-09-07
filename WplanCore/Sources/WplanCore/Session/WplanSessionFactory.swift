@@ -1,7 +1,7 @@
 import Foundation
 
 public enum WplanSessionFactory {
-    /// - Parameter appGroupIdentifier: pass the app's App Group id (e.g. `"group.ru.itmo.wplanwidget"`)
+    /// - Parameter appGroupIdentifier: pass the app's App Group id (e.g. `"group.com.wplanwidget.app"`)
     ///   so the host app, widget extension, and background scheduler share one cookie jar. Pass `nil`
     ///   in contexts without an App Group (tests, a CLI harness).
     public static func makeSession(appGroupIdentifier: String?) -> URLSession {

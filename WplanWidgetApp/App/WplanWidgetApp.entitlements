@@ -8,7 +8,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.ru.itmo.wplanwidget</string>
+		<string>group.com.wplanwidget.app</string>
 	</array>
 </dict>
 </plist>

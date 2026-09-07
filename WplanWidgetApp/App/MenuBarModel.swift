@@ -8,7 +8,7 @@ import WplanCore
 /// in sync — see its doc comment).
 @MainActor
 final class MenuBarModel: ObservableObject {
-    static let appGroupIdentifier = "group.ru.itmo.wplanwidget"
+    static let appGroupIdentifier = "group.com.wplanwidget.app"
 
     @Published var isLoggedIn = false
     @Published var vpnStatus: VPNNetworkChecker.Status = .disconnected
@@ -21,7 +21,7 @@ final class MenuBarModel: ObservableObject {
     @Published var isLoggingIn = false
     @Published var loginErrorMessage: String?
 
-    private let keychain = KeychainStore(service: "ru.itmo.wplanwidget")
+    private let keychain = KeychainStore(service: "com.wplanwidget.app")
     private let vpnChecker = VPNNetworkChecker()
     private let client: WplanClient
 
