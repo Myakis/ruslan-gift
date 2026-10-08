@@ -92,11 +92,13 @@ public final class WplanAutomationAgent {
 public enum WplanAutomation {
     public static func makeAgent(
         appGroupIdentifier: String?,
+        keychainService: String,
         configuration: ScheduleConfiguration,
         tickInterval: TimeInterval = 30
     ) -> WplanAutomationAgent {
         let session = WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier)
-        let client = WplanClient(session: session)
+        let rawClient = WplanClient(session: session)
+        let client = ReauthenticatingWplanClient(client: rawClient, credentialsStore: KeychainStore(service: keychainService))
         let network = VPNNetworkChecker(probeURL: WplanClient.defaultBaseURL, session: session)
         let scheduler = AutoclickScheduler(client: client, network: network, configuration: configuration)
         return WplanAutomationAgent(scheduler: scheduler, tickInterval: tickInterval)

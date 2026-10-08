@@ -9,6 +9,7 @@ import WplanCore
 @MainActor
 final class MenuBarModel: ObservableObject {
     static let appGroupIdentifier = "group.com.wplanwidget.app"
+    static let keychainService = "com.wplanwidget.app"
 
     @Published var isLoggedIn = false
     @Published var vpnStatus: VPNNetworkChecker.Status = .disconnected
@@ -21,13 +22,19 @@ final class MenuBarModel: ObservableObject {
     @Published var isLoggingIn = false
     @Published var loginErrorMessage: String?
 
-    private let keychain = KeychainStore(service: "com.wplanwidget.app")
+    private let keychain = KeychainStore(service: MenuBarModel.keychainService)
     private let vpnChecker = VPNNetworkChecker()
     private let client: WplanClient
+    /// Wraps `client` with one automatic re-login attempt (from the Keychain
+    /// credentials just below) when the session has silently expired — see
+    /// `ReauthenticatingWplanClient`. Only used for the read-only status check;
+    /// `login()` itself always goes through the raw `client`.
+    private let statusClient: any WplanDayControlling
 
     init() {
         let session = WplanSessionFactory.makeSession(appGroupIdentifier: Self.appGroupIdentifier)
         client = WplanClient(session: session)
+        statusClient = ReauthenticatingWplanClient(client: client, credentialsStore: KeychainStore(service: Self.keychainService))
     }
 
     func refresh() async {
@@ -74,7 +81,7 @@ final class MenuBarModel: ObservableObject {
         isCheckingButtonState = true
         defer { isCheckingButtonState = false }
         do {
-            let state = try await client.fetchButtonState()
+            let state = try await statusClient.fetchButtonState()
             isRunningDay = !state.isStart
             buttonStateText = state.isStart
                 ? "День не начат (кнопка = «Начать»)"

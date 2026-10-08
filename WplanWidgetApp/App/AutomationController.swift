@@ -36,7 +36,10 @@ final class AutomationController: ObservableObject {
     private let agent: WplanAutomationAgent
     /// Separate from the agent's own client — only used for the periodic widget
     /// snapshot read, which happens on its own cadence independent of the schedule.
-    private let statusClient: WplanClient
+    /// Wrapped with `ReauthenticatingWplanClient` for the same reason the agent's
+    /// own client is (see `WplanAutomation.makeAgent`) — an expired session
+    /// shouldn't silently stop the widget from updating either.
+    private let statusClient: any WplanDayControlling
     private let vpnChecker = VPNNetworkChecker()
     private var widgetRefreshTask: Task<Void, Never>?
     private var resetRequestPollTask: Task<Void, Never>?
@@ -62,9 +65,17 @@ final class AutomationController: ObservableObject {
         }
         configuration = initialConfiguration
 
-        let initialAgent = WplanAutomation.makeAgent(appGroupIdentifier: appGroupIdentifier, configuration: initialConfiguration)
+        let initialAgent = WplanAutomation.makeAgent(
+            appGroupIdentifier: appGroupIdentifier,
+            keychainService: MenuBarModel.keychainService,
+            configuration: initialConfiguration
+        )
         agent = initialAgent
-        statusClient = WplanClient(session: WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier))
+        let rawStatusClient = WplanClient(session: WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier))
+        statusClient = ReauthenticatingWplanClient(
+            client: rawStatusClient,
+            credentialsStore: KeychainStore(service: MenuBarModel.keychainService)
+        )
         let shouldRun = defaults?.bool(forKey: Self.isRunningKey) ?? false
         isRunning = shouldRun
 
