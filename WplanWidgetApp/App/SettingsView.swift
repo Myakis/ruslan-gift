@@ -125,7 +125,6 @@ struct SettingsView: View {
             }
             .padding(16)
         }
-        .frame(width: 340)
         .onReceive(clockTimer) { now = $0 }
     }
 

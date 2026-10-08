@@ -12,11 +12,5 @@ struct WplanWidgetApp: App {
             MenuBarLabelView()
         }
         .menuBarExtraStyle(.window)
-
-        Window("Настройки Wplan", id: "settings") {
-            SettingsView(automation: automation)
-        }
-        .windowResizability(.contentSize)
-        .defaultSize(width: 340, height: 380)
     }
 }

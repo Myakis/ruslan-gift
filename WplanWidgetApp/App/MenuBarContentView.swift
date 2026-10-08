@@ -3,7 +3,10 @@ import SwiftUI
 struct MenuBarContentView: View {
     @ObservedObject var model: MenuBarModel
     @ObservedObject var automation: AutomationController
-    @Environment(\.openWindow) private var openWindow
+    /// Settings used to be a separate `Window` scene — now it's just another
+    /// screen inside the same popover, toggled in place, so the menu-bar icon
+    /// stays the single entry point instead of spawning a second window.
+    @State private var showSettings = false
 
     private var headline: String {
         switch model.vpnStatus {
@@ -25,6 +28,35 @@ struct MenuBarContentView: View {
     }
 
     var body: some View {
+        Group {
+            if showSettings {
+                settingsBody
+            } else {
+                menuBody
+            }
+        }
+        .task {
+            await model.refresh()
+            if model.isLoggedIn { await model.checkButtonState() }
+        }
+    }
+
+    private var settingsBody: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button(action: { showSettings = false }) {
+                Label("Назад", systemImage: "chevron.left")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+
+            SettingsView(automation: automation)
+        }
+        .padding(10)
+        .frame(width: 340)
+    }
+
+    private var menuBody: some View {
         VStack(alignment: .leading, spacing: 10) {
             if model.isLoggedIn {
                 StatusCard(
@@ -79,7 +111,7 @@ struct MenuBarContentView: View {
 
                 VStack(spacing: 2) {
                     MenuActionButton(title: "Настройки…", systemImage: "gearshape") {
-                        openWindow(id: "settings")
+                        showSettings = true
                     }
                     MenuActionButton(title: "Выйти из аккаунта", systemImage: "person.crop.circle.badge.minus") {
                         model.logout()
@@ -97,9 +129,5 @@ struct MenuBarContentView: View {
         }
         .padding(10)
         .frame(width: 280)
-        .task {
-            await model.refresh()
-            if model.isLoggedIn { await model.checkButtonState() }
-        }
     }
 }
