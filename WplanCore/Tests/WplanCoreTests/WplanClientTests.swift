@@ -72,6 +72,36 @@ final class WplanClientTests: XCTestCase {
         XCTAssertEqual((body["variables"] as! [String: Any])["isStart"] as? Bool, true)
     }
 
+    func test_fetchWorkTimeEvents_sendsDateAndParsesLocalTimes() async throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Europe/Moscow")!
+        var capturedURL: URL?
+        URLProtocolStub.handler = { request in
+            capturedURL = request.url
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let json = #"{"data":{"workTimeEventsForDate":[{"startTime":"2026-10-27T08:51:48","endTime":"2026-10-27T09:47:25.0217023","__typename":"EventsForDate"},{"startTime":"2026-10-27T10:00:00","endTime":null}]}}"#
+            return (response, Data(json.utf8))
+        }
+        let client = WplanClient(session: URLProtocolStub.makeStubbedSession())
+        let day = calendar.date(from: DateComponents(year: 2026, month: 10, day: 27, hour: 12))!
+
+        let events = try await client.fetchWorkTimeEvents(for: day, calendar: calendar)
+
+        let query = try XCTUnwrap(URLComponents(url: XCTUnwrap(capturedURL), resolvingAgainstBaseURL: false)?.queryItems)
+        XCTAssertEqual(query.first { $0.name == "operationName" }?.value, "WorkTimeEventsForDate")
+        XCTAssertEqual(query.first { $0.name == "variables" }?.value, #"{"date":"2026-10-27"}"#)
+        XCTAssertEqual(events, [
+            WplanWorkTimeEvent(
+                startTime: calendar.date(from: DateComponents(year: 2026, month: 10, day: 27, hour: 8, minute: 51, second: 48))!,
+                endTime: calendar.date(from: DateComponents(year: 2026, month: 10, day: 27, hour: 9, minute: 47, second: 25))!
+            ),
+            WplanWorkTimeEvent(
+                startTime: calendar.date(from: DateComponents(year: 2026, month: 10, day: 27, hour: 10))!,
+                endTime: nil
+            )
+        ])
+    }
+
     /// URLSession delivers a POST body to URLProtocol subclasses as `httpBodyStream`,
     /// not `httpBody` (even though the original `URLRequest` was built with `httpBody`).
     static func bodyData(from request: URLRequest) -> Data? {

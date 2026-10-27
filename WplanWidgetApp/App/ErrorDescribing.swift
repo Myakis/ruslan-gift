@@ -13,7 +13,10 @@ func describeWplanError(_ error: Error) -> String {
         case .http(let status, let body):
             return "HTTP \(status) — \(body)"
         case .graphQL(let messages):
-            return messages.joined(separator: "; ")
+            let text = messages.joined(separator: "; ")
+            return clientError.isPersistedQueryNotFound
+                ? "\(text) — хэши устарели, обновите их в Настройках → «Хэши запросов»"
+                : text
         }
     }
     let nsError = error as NSError

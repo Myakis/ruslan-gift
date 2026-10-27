@@ -3,40 +3,52 @@ import Foundation
 public final class WplanClient {
     public static let defaultBaseURL = URL(string: "https://wplan.office.lan/ru-RU/api/graphql")!
 
-    private static let loginHash = "ff121a0629289a656be6a1d2372fe47a99efef03825e79d2b56f40c20e870264"
-    private static let buttonStateHash = "d8142718a7d030614362030016adf01cf85fb1950b9bd94fbd3d3dd6d27c8d38"
-    private static let startOrFinishDayHash = "7809b05aa2dcb5ab05e21db5923aafb32a92cddfcaa56626593267775866e3f4"
-
     private let graphQL: GraphQLClient
+    private let hashStore: PersistedQueryHashStore
 
-    public init(baseURL: URL = WplanClient.defaultBaseURL, session: URLSession) {
+    public init(
+        baseURL: URL = WplanClient.defaultBaseURL,
+        session: URLSession,
+        hashStore: PersistedQueryHashStore = PersistedQueryHashStore(appGroupIdentifier: nil)
+    ) {
         self.graphQL = GraphQLClient(baseURL: baseURL, session: session)
+        self.hashStore = hashStore
     }
 
     public func fetchButtonState() async throws -> WplanButtonState {
         let operation = GraphQLOperation(
-            operationName: "StartOrFinishButtonState",
+            operationName: PersistedQueryHashStore.Operation.buttonState.rawValue,
             variables: EmptyVariables(),
-            sha256Hash: Self.buttonStateHash
+            sha256Hash: hashStore.hash(for: .buttonState)
         )
         let data: StartOrFinishButtonStateData = try await graphQL.execute(operation, method: .get, dataType: StartOrFinishButtonStateData.self)
         return data.startOrFinishDayButtonState
     }
 
+    public func fetchWorkTimeEvents(for date: Date, calendar: Calendar = .current) async throws -> [WplanWorkTimeEvent] {
+        let operation = GraphQLOperation(
+            operationName: PersistedQueryHashStore.Operation.workTimeEvents.rawValue,
+            variables: WorkTimeEventsVariables(date: WplanDateFormat.dayString(date, calendar: calendar)),
+            sha256Hash: hashStore.hash(for: .workTimeEvents)
+        )
+        let data: WorkTimeEventsForDateData = try await graphQL.execute(operation, method: .get, dataType: WorkTimeEventsForDateData.self)
+        return data.events(calendar: calendar)
+    }
+
     public func login(username: String, password: String) async throws {
         let operation = GraphQLOperation(
-            operationName: "Login",
+            operationName: PersistedQueryHashStore.Operation.login.rawValue,
             variables: LoginVariables(username: username, password: password),
-            sha256Hash: Self.loginHash
+            sha256Hash: hashStore.hash(for: .login)
         )
         try await graphQL.executeIgnoringResult(operation, method: .post)
     }
 
     public func startOrFinishDay(isStart: Bool) async throws {
         let operation = GraphQLOperation(
-            operationName: "StartOrFinishDay",
+            operationName: PersistedQueryHashStore.Operation.startOrFinishDay.rawValue,
             variables: StartOrFinishDayVariables(isStart: isStart),
-            sha256Hash: Self.startOrFinishDayHash
+            sha256Hash: hashStore.hash(for: .startOrFinishDay)
         )
         try await graphQL.executeIgnoringResult(operation, method: .post)
     }

@@ -39,12 +39,12 @@ final class AutomationController: ObservableObject {
     /// Wrapped with `ReauthenticatingWplanClient` for the same reason the agent's
     /// own client is (see `WplanAutomation.makeAgent`) — an expired session
     /// shouldn't silently stop the widget from updating either.
-    private let statusClient: any WplanDayControlling
+    private let statusClient: ReauthenticatingWplanClient
     private let vpnChecker = VPNNetworkChecker()
     private var widgetRefreshTask: Task<Void, Never>?
     private var resetRequestPollTask: Task<Void, Never>?
 
-    init(appGroupIdentifier: String) {
+    init(appGroupIdentifier: String, hashRefresher: PersistedQueryHashRefreshing?) {
         self.appGroupIdentifier = appGroupIdentifier
         let defaults = UserDefaults(suiteName: appGroupIdentifier)
         self.defaults = defaults
@@ -68,13 +68,18 @@ final class AutomationController: ObservableObject {
         let initialAgent = WplanAutomation.makeAgent(
             appGroupIdentifier: appGroupIdentifier,
             keychainService: MenuBarModel.keychainService,
-            configuration: initialConfiguration
+            configuration: initialConfiguration,
+            hashRefresher: hashRefresher
         )
         agent = initialAgent
-        let rawStatusClient = WplanClient(session: WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier))
+        let rawStatusClient = WplanClient(
+            session: WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier),
+            hashStore: PersistedQueryHashStore(appGroupIdentifier: appGroupIdentifier)
+        )
         statusClient = ReauthenticatingWplanClient(
             client: rawStatusClient,
-            credentialsStore: KeychainStore(service: MenuBarModel.keychainService)
+            credentialsStore: KeychainStore(service: MenuBarModel.keychainService),
+            hashRefresher: hashRefresher
         )
         let shouldRun = defaults?.bool(forKey: Self.isRunningKey) ?? false
         isRunning = shouldRun
@@ -184,6 +189,7 @@ final class AutomationController: ObservableObject {
         let isStart: Bool?
         if let state = try? await statusClient.fetchButtonState() {
             isStart = state.isStart
+            await syncDayTimesFromServer(isDayRunning: !state.isStart, now: now)
         } else {
             isStart = WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier)?.isStart
         }
@@ -208,6 +214,25 @@ final class AutomationController: ObservableObject {
             appGroupIdentifier: appGroupIdentifier
         )
         WidgetCenter.shared.reloadTimelines(ofKind: Self.widgetKind)
+    }
+
+    /// Takes today's real start/finish from Wplan itself, so a day started or
+    /// finished on the website (not through this app) still shows correctly.
+    private func syncDayTimesFromServer(isDayRunning: Bool, now: Date) async {
+        guard let events = try? await statusClient.fetchWorkTimeEvents(for: now), !events.isEmpty else { return }
+
+        if isDayRunning, await agent.currentFinishedAt() != nil {
+            // Finished earlier today, then restarted on the site — the stale finish
+            // would otherwise keep the widget showing "finished".
+            await agent.resetDayStateForToday()
+            defaults?.removeObject(forKey: Self.finishedAtKey)
+        }
+        if let firstStart = events.map(\.startTime).min() {
+            await agent.seedStartedAt(firstStart)
+        }
+        if !isDayRunning, let lastEnd = events.compactMap(\.endTime).max() {
+            await agent.seedFinishedAt(lastEnd)
+        }
     }
 
     private func startWidgetRefreshLoop() {

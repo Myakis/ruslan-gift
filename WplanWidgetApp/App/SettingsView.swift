@@ -7,6 +7,7 @@ private let weekdayLabels: [(value: Int, label: String)] = [
 
 struct SettingsView: View {
     @ObservedObject var automation: AutomationController
+    @ObservedObject var sniffer: WplanQuerySniffer
     @StateObject private var status = MenuBarStatusModel()
     /// Ticks every second so "Осталось"/"Время" move smoothly, independent of
     /// `status`'s own (much coarser) 15s snapshot refresh.
@@ -122,6 +123,31 @@ struct SettingsView: View {
                             .foregroundStyle(.red)
                     }
                 }
+
+                sectionBlock(title: "Хэши запросов") {
+                    ForEach(sniffer.entries, id: \.operation) { entry in
+                        hashRow(entry)
+                    }
+                    if let snifferStatusText {
+                        Text(snifferStatusText)
+                            .font(.system(size: 10.5))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    HStack(spacing: 8) {
+                        Button("Обновить автоматически") {
+                            Task { _ = await sniffer.refreshHashesNow() }
+                        }
+                        .disabled(sniffer.status == .running)
+                        Button("Открыть Wplan…") {
+                            NSApp.activate(ignoringOtherApps: true)
+                            sniffer.openWindow()
+                        }
+                    }
+                    .controlSize(.small)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
             .padding(16)
         }
@@ -189,6 +215,41 @@ struct SettingsView: View {
                 .tint(.green)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var snifferStatusText: String? {
+        switch sniffer.status {
+        case .idle:
+            return nil
+        case .running:
+            return "Открываю Wplan и перехватываю запросы…"
+        case .finished(let captured, let changed):
+            let total = PersistedQueryHashStore.Operation.allCases.count
+            return changed > 0
+                ? "Перехвачено: \(captured) из \(total), обновлено: \(changed)"
+                : "Перехвачено: \(captured) из \(total), хэши не менялись"
+        case .failed(let message):
+            return message
+        }
+    }
+
+    private func hashRow(_ entry: PersistedQueryHashStore.Entry) -> some View {
+        HStack(spacing: 6) {
+            Text(entry.operation.rawValue)
+                .font(.system(size: 11))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 4)
+            Text(entry.hash.prefix(8))
+                .font(.system(size: 10.5, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .help(entry.hash)
+            if let updatedAt = entry.updatedAt {
+                Text(updatedAt, format: .dateTime.day().month().hour().minute())
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+            }
+        }
     }
 
     private func timeBox(label: String, selection: Binding<Date>) -> some View {

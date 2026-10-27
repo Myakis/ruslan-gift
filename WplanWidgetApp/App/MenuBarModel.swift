@@ -24,17 +24,17 @@ final class MenuBarModel: ObservableObject {
 
     private let keychain = KeychainStore(service: MenuBarModel.keychainService)
     private let vpnChecker = VPNNetworkChecker()
-    private let client: WplanClient
-    /// Wraps `client` with one automatic re-login attempt (from the Keychain
-    /// credentials just below) when the session has silently expired — see
-    /// `ReauthenticatingWplanClient`. Only used for the read-only status check;
-    /// `login()` itself always goes through the raw `client`.
-    private let statusClient: any WplanDayControlling
+    /// Re-logs in from the Keychain on an expired session and refreshes stale
+    /// persisted-query hashes via the sniffer — see `ReauthenticatingWplanClient`.
+    private let client: ReauthenticatingWplanClient
 
-    init() {
+    init(hashRefresher: PersistedQueryHashRefreshing?) {
         let session = WplanSessionFactory.makeSession(appGroupIdentifier: Self.appGroupIdentifier)
-        client = WplanClient(session: session)
-        statusClient = ReauthenticatingWplanClient(client: client, credentialsStore: KeychainStore(service: Self.keychainService))
+        client = ReauthenticatingWplanClient(
+            client: WplanClient(session: session, hashStore: PersistedQueryHashStore(appGroupIdentifier: Self.appGroupIdentifier)),
+            credentialsStore: KeychainStore(service: Self.keychainService),
+            hashRefresher: hashRefresher
+        )
     }
 
     func refresh() async {
@@ -81,7 +81,7 @@ final class MenuBarModel: ObservableObject {
         isCheckingButtonState = true
         defer { isCheckingButtonState = false }
         do {
-            let state = try await statusClient.fetchButtonState()
+            let state = try await client.fetchButtonState()
             isRunningDay = !state.isStart
             buttonStateText = state.isStart
                 ? "День не начат (кнопка = «Начать»)"

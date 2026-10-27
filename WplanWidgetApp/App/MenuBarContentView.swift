@@ -1,8 +1,10 @@
 import SwiftUI
+import WplanCore
 
 struct MenuBarContentView: View {
     @ObservedObject var model: MenuBarModel
     @ObservedObject var automation: AutomationController
+    let sniffer: WplanQuerySniffer
     /// Settings used to be a separate `Window` scene — now it's just another
     /// screen inside the same popover, toggled in place, so the menu-bar icon
     /// stays the single entry point instead of spawning a second window.
@@ -46,11 +48,12 @@ struct MenuBarContentView: View {
             Button(action: { showSettings = false }) {
                 Label("Назад", systemImage: "chevron.left")
                     .font(.system(size: 12, weight: .medium))
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
 
-            SettingsView(automation: automation)
+            SettingsView(automation: automation, sniffer: sniffer)
         }
         .padding(10)
         .frame(width: 340)

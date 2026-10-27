@@ -94,11 +94,16 @@ public enum WplanAutomation {
         appGroupIdentifier: String?,
         keychainService: String,
         configuration: ScheduleConfiguration,
+        hashRefresher: PersistedQueryHashRefreshing? = nil,
         tickInterval: TimeInterval = 30
     ) -> WplanAutomationAgent {
         let session = WplanSessionFactory.makeSession(appGroupIdentifier: appGroupIdentifier)
-        let rawClient = WplanClient(session: session)
-        let client = ReauthenticatingWplanClient(client: rawClient, credentialsStore: KeychainStore(service: keychainService))
+        let rawClient = WplanClient(session: session, hashStore: PersistedQueryHashStore(appGroupIdentifier: appGroupIdentifier))
+        let client = ReauthenticatingWplanClient(
+            client: rawClient,
+            credentialsStore: KeychainStore(service: keychainService),
+            hashRefresher: hashRefresher
+        )
         let network = VPNNetworkChecker(probeURL: WplanClient.defaultBaseURL, session: session)
         let scheduler = AutoclickScheduler(client: client, network: network, configuration: configuration)
         return WplanAutomationAgent(scheduler: scheduler, tickInterval: tickInterval)
