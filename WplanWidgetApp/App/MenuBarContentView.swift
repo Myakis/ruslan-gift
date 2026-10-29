@@ -76,10 +76,13 @@ struct MenuBarContentView: View {
                     dotColor: MenuBarStyle.vpnColor(model.vpnStatus, isRunning: model.isRunningDay),
                     headline: headline,
                     subtitle: subtitle,
+                    isRefreshing: model.isCheckingButtonState,
                     onRefresh: {
                         Task {
                             await model.refresh()
+                            await model.checkButtonState()
                             await automation.refreshWidgetSnapshot()
+                            status.refresh()
                         }
                     }
                 )
@@ -105,19 +108,6 @@ struct MenuBarContentView: View {
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 10)
-                    }
-                }
-
-                VStack(spacing: 2) {
-                    MenuActionButton(
-                        title: "Проверить статус дня",
-                        systemImage: "checkmark.circle",
-                        isLoading: model.isCheckingButtonState
-                    ) {
-                        Task {
-                            await model.checkButtonState()
-                            await automation.refreshWidgetSnapshot()
-                        }
                     }
                 }
 

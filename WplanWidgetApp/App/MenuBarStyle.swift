@@ -52,6 +52,7 @@ struct StatusCard: View {
     let dotColor: Color
     let headline: String
     let subtitle: String?
+    var isRefreshing = false
     var onRefresh: (() -> Void)?
 
     var body: some View {
@@ -70,13 +71,20 @@ struct StatusCard: View {
                 if let onRefresh {
                     Spacer()
                     Button(action: onRefresh) {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 10, weight: .medium))
-                            .frame(width: 20, height: 20)
-                            .background(Circle().fill(Color.primary.opacity(0.08)))
+                        Group {
+                            if isRefreshing {
+                                ProgressView().controlSize(.mini)
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 10, weight: .medium))
+                            }
+                        }
+                        .frame(width: 20, height: 20)
+                        .background(Circle().fill(Color.primary.opacity(0.08)))
                     }
                     .buttonStyle(.plain)
-                    .help("Обновить статус")
+                    .disabled(isRefreshing)
+                    .help("Обновить статус дня и VPN")
                 }
             }
             if let subtitle {
