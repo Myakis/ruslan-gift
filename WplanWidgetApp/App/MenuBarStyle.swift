@@ -134,3 +134,96 @@ struct MenuActionButton: View {
         .disabled(isLoading)
     }
 }
+
+/// The popover's primary action. Starting is a plain click; finishing needs a
+/// ~1s press-and-hold (a fill sweeps across while held), so a stray click can't
+/// end the day.
+struct DayActionButton: View {
+    let isRunning: Bool
+    let startedAt: Date?
+    var isLoading = false
+    let action: () -> Void
+
+    @State private var holdProgress: CGFloat = 0
+    private static let holdDuration: Double = 1.0
+    private let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+
+    var body: some View {
+        if isRunning {
+            finishButton
+        } else {
+            startButton
+        }
+    }
+
+    private var startButton: some View {
+        Button(action: action) {
+            label(title: "Начать день", systemImage: "play.fill", detail: nil)
+                .foregroundStyle(.white)
+                .background(shape.fill(Color.green.opacity(0.85)))
+                .contentShape(shape)
+        }
+        .buttonStyle(.plain)
+        .disabled(isLoading)
+    }
+
+    private var finishButton: some View {
+        TimelineView(.periodic(from: .now, by: 30)) { context in
+            label(title: "Завершить день", systemImage: "stop.fill", detail: finishDetail(now: context.date))
+                .foregroundStyle(.red)
+                .background {
+                    ZStack(alignment: .leading) {
+                        shape.fill(Color.red.opacity(0.14))
+                        GeometryReader { geo in
+                            Rectangle()
+                                .fill(Color.red.opacity(0.28))
+                                .frame(width: geo.size.width * holdProgress)
+                        }
+                    }
+                    .clipShape(shape)
+                }
+                .contentShape(shape)
+        }
+        .onLongPressGesture(minimumDuration: Self.holdDuration, maximumDistance: 24) {
+            holdProgress = 0
+            action()
+        } onPressingChanged: { isPressing in
+            guard !isLoading else { return }
+            withAnimation(isPressing ? .linear(duration: Self.holdDuration) : .easeOut(duration: 0.2)) {
+                holdProgress = isPressing ? 1 : 0
+            }
+        }
+        .allowsHitTesting(!isLoading)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { action() }
+        .help("Удерживайте, чтобы завершить рабочий день")
+    }
+
+    private func finishDetail(now: Date) -> String {
+        guard let startedAt else { return "удерживайте" }
+        let minutes = max(0, Int(now.timeIntervalSince(startedAt) / 60))
+        return "\(minutes / 60):\(String(format: "%02d", minutes % 60)) · удерживайте"
+    }
+
+    private func label(title: String, systemImage: String, detail: String?) -> some View {
+        HStack(spacing: 8) {
+            if isLoading {
+                ProgressView().controlSize(.small)
+            } else {
+                Image(systemName: systemImage)
+                    .font(.system(size: 12, weight: .semibold))
+            }
+            Text(title)
+                .font(.system(size: 13, weight: .semibold))
+            Spacer(minLength: 6)
+            if let detail {
+                Text(detail)
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .opacity(0.8)
+            }
+        }
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, minHeight: 38)
+    }
+}

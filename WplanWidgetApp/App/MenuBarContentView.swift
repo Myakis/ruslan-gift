@@ -9,6 +9,7 @@ struct MenuBarContentView: View {
     /// screen inside the same popover, toggled in place, so the menu-bar icon
     /// stays the single entry point instead of spawning a second window.
     @State private var showSettings = false
+    @StateObject private var status = MenuBarStatusModel()
 
     private var headline: String {
         switch model.vpnStatus {
@@ -27,6 +28,13 @@ struct MenuBarContentView: View {
         if let buttonStateText = model.buttonStateText { return buttonStateText }
         if model.vpnStatus != .connected { return "Включите VPN — клик выполнится сам" }
         return nil
+    }
+
+    private var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String ?? "—"
+        return "Wplan \(version) (\(build))"
     }
 
     var body: some View {
@@ -76,6 +84,30 @@ struct MenuBarContentView: View {
                     }
                 )
 
+                VStack(spacing: 6) {
+                    DayActionButton(
+                        isRunning: model.isRunningDay == true,
+                        startedAt: status.snapshot?.startedAt,
+                        isLoading: automation.isPerformingManualAction || model.isCheckingButtonState
+                    ) {
+                        let isStart = model.isRunningDay != true
+                        Task {
+                            await automation.performManualClick(isStart: isStart)
+                            await model.checkButtonState()
+                            status.refresh()
+                        }
+                    }
+                    if let manualActionText = automation.manualActionText {
+                        Text(manualActionText)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 10)
+                    }
+                }
+
                 VStack(spacing: 2) {
                     MenuActionButton(
                         title: "Проверить статус дня",
@@ -86,29 +118,6 @@ struct MenuBarContentView: View {
                             await model.checkButtonState()
                             await automation.refreshWidgetSnapshot()
                         }
-                    }
-                }
-
-                VStack(spacing: 2) {
-                    MenuActionButton(
-                        title: model.isRunningDay == true ? "Завершить" : "Начать",
-                        systemImage: model.isRunningDay == true ? "stop.circle" : "play.circle",
-                        tint: model.isRunningDay == true ? .red : .green,
-                        isLoading: automation.isPerformingManualAction || model.isCheckingButtonState
-                    ) {
-                        let isStart = model.isRunningDay != true
-                        Task {
-                            await automation.performManualClick(isStart: isStart)
-                            await model.checkButtonState()
-                        }
-                    }
-                    if let manualActionText = automation.manualActionText {
-                        Text(manualActionText)
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .textSelection(.enabled)
-                            .padding(.horizontal, 10)
                     }
                 }
 
@@ -126,9 +135,24 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            MenuActionButton(title: "Завершить Wplan", systemImage: "xmark.circle") {
-                NSApplication.shared.terminate(nil)
+            HStack {
+                Text(versionText)
+                    .font(.system(size: 10.5))
+                    .foregroundStyle(.tertiary)
+                Spacer()
+                Button {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    Image(systemName: "power")
+                        .font(.system(size: 12, weight: .medium))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help("Выйти из Wplan")
             }
+            .padding(.horizontal, 6)
         }
         .padding(10)
         .frame(width: 280)

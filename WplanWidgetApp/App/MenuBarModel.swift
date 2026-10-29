@@ -8,7 +8,7 @@ import WplanCore
 /// in sync — see its doc comment).
 @MainActor
 final class MenuBarModel: ObservableObject {
-    static let appGroupIdentifier = "group.com.wplanwidget.app"
+    static let appGroupIdentifier = WplanAppGroup.identifier
     static let keychainService = "com.wplanwidget.app"
 
     @Published var isLoggedIn = false
@@ -83,9 +83,7 @@ final class MenuBarModel: ObservableObject {
         do {
             let state = try await client.fetchButtonState()
             isRunningDay = !state.isStart
-            buttonStateText = state.isStart
-                ? "День не начат (кнопка = «Начать»)"
-                : "День уже идёт (кнопка = «Завершить»)"
+            buttonStateText = nil
         } catch {
             buttonStateText = "Ошибка: \(describeWplanError(error))"
         }

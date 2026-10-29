@@ -3,7 +3,7 @@ import WplanCore
 
 /// Drives the menu-bar icon itself — reads the same `WidgetSnapshot` the widget
 /// does (cheap: just a local UserDefaults read, no network) and re-renders every
-/// 15s so the elapsed time visibly ticks, independent of how often the snapshot
+/// 15s so the progress ring visibly advances, independent of how often the snapshot
 /// itself gets refreshed by `AutomationController`.
 @MainActor
 final class MenuBarStatusModel: ObservableObject {
@@ -27,8 +27,8 @@ final class MenuBarStatusModel: ObservableObject {
     }
 }
 
-/// Design doc screen `1b`'s menu-bar look: a colored status dot + a monospaced
-/// elapsed timer while the day is running, falling back to a plain icon otherwise.
+/// Menu-bar look: the brand icon, a VPN alert badge when needed, and a progress
+/// ring toward the scheduled finish while the day is running.
 struct MenuBarLabelView: View {
     @StateObject private var status = MenuBarStatusModel()
 
@@ -40,10 +40,14 @@ struct MenuBarLabelView: View {
         status.snapshot?.isStart.map { !$0 }
     }
 
-    private var elapsedText: String? {
-        guard vpnStatus == .connected, isRunning == true, let startedAt = status.snapshot?.startedAt else { return nil }
-        let elapsedMinutes = max(0, Int(status.now.timeIntervalSince(startedAt) / 60))
-        return "\(elapsedMinutes / 60):\(String(format: "%02d", elapsedMinutes % 60))"
+    /// Same formula as the widget's ring: start → scheduled finish.
+    private var progressFraction: Double? {
+        guard vpnStatus == .connected, isRunning == true,
+              let startedAt = status.snapshot?.startedAt,
+              let finishAt = status.snapshot?.scheduledFinishAt,
+              finishAt > startedAt else { return nil }
+        let fraction = status.now.timeIntervalSince(startedAt) / finishAt.timeIntervalSince(startedAt)
+        return min(max(fraction, 0), 1)
     }
 
     /// The brand icon carries its own (always-green) dot, so it only needs an
@@ -57,8 +61,11 @@ struct MenuBarLabelView: View {
         }
     }
 
-    var body: some View {
-        HStack(spacing: 4) {
+    /// `MenuBarExtra` keeps only one image and one text from its label, dropping
+    /// shapes and any extra image — so the icon, VPN badge and progress ring are
+    /// rasterized together into that single image.
+    private var iconImage: NSImage? {
+        let content = HStack(spacing: 4) {
             Image("MenuBarIcon")
                 .renderingMode(.original)
                 .opacity(vpnStatus == .disconnected ? 0.5 : 1)
@@ -70,10 +77,39 @@ struct MenuBarLabelView: View {
                             .offset(x: 2, y: -2)
                     }
                 }
-            if let elapsedText {
-                Text(elapsedText)
-                    .font(.system(.body, design: .monospaced))
+            if let fraction = progressFraction {
+                MenuBarProgressRing(fraction: fraction)
             }
         }
+        .padding(2)
+        let renderer = ImageRenderer(content: content)
+        renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
+        return renderer.nsImage
+    }
+
+    var body: some View {
+        if let iconImage {
+            Image(nsImage: iconImage)
+        } else {
+            Image("MenuBarIcon").renderingMode(.original)
+        }
+    }
+}
+
+private struct MenuBarProgressRing: View {
+    let fraction: Double
+    private let lineWidth: CGFloat = 2.5
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.gray.opacity(0.45), lineWidth: lineWidth)
+            Circle()
+                .trim(from: 0, to: fraction)
+                .stroke(Color.green, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+        }
+        .padding(lineWidth / 2)
+        .frame(width: 16, height: 16)
     }
 }
