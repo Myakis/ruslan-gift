@@ -7,15 +7,14 @@
 на `widget`, пока `main` не обновлён). По кнопке:
 
 1. Собирает `WplanCore` + `WplanWidgetApp` через `xcodegen` + `xcodebuild archive`.
-2. Подписывает тем же сертификатом «Apple Development», что и локально —
-   импортирует его во временный keychain и кладёт уже готовые (сгенерированные
-   локальным Xcode) провижининг-профили в нужную папку. Подпись остаётся
-   **Automatic** (как в `project.yml`) — Manual тут не вариант: профили от
-   бесплатного аккаунта всегда `IsXcodeManaged: true`, и Xcode отказывается
-   использовать такие в Manual-режиме, даже если имя совпадает. Проверено
-   локально: Automatic находит совпадающие сертификат+профиль без обращения
-   в сеть, если они уже присутствуют — то есть в CI работает точно так же.
-3. Экспортирует `.app`, пакует в `.dmg` (`scripts/build_dmg.sh`).
+2. Подписывает тем же сертификатом «Apple Development», что и локально, —
+   импортирует его во временный keychain. Подпись **Manual, без
+   провижининг-профиля** (см. `project.yml`): App Group имеет вид
+   `<TeamID>.com.wplanwidget.app`, а такие группы macOS разрешает по самой
+   подписи, профиль им не нужен. Поэтому у сборки нет 7-дневного срока
+   бесплатного профиля — живёт, пока действует сертификат (год).
+3. Берёт подписанный `.app` прямо из архива и пакует в `.dmg`
+   (`scripts/build_dmg.sh`).
 4. Публикует GitHub Release с этим DMG, тегом (тем, что ты введёшь при
    запуске) и текстом из секции `[Unreleased]` в `CHANGELOG.md`.
 
@@ -24,9 +23,10 @@
 
 ## Разовая настройка секретов (нужно сделать один раз, руками)
 
-Нужны 4 секрета в **Settings → Secrets and variables → Actions** этого
-репозитория. У тебя уже есть готовый сертификат и оба провижининг-профиля —
-их просто нужно экспортировать и закодировать в base64.
+Нужны 2 секрета в **Settings → Secrets and variables → Actions** этого
+репозитория — сертификат и пароль к нему. Провижининг-профили не нужны.
+Если от старой схемы остались секреты `MACOS_PROFILE_APP_BASE64` и
+`MACOS_PROFILE_WIDGET_BASE64` — их можно удалить.
 
 ### 1. Сертификат (.p12)
 
@@ -51,31 +51,7 @@ base64 -i ~/Desktop/wplan-cert.p12 | pbcopy
 Удали `~/Desktop/wplan-cert.p12` после того, как секрет сохранён — он тебе
 больше не нужен на диске.
 
-### 2. Провижининг-профили
-
-Уже сгенерированы локальным Xcode, лежат в
-`~/Library/Developer/Xcode/UserData/Provisioning Profiles/`:
-
-```bash
-base64 -i ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles/e892d45f-082c-425a-a813-b29a02ed94ef.provisionprofile | pbcopy
-```
-→ секрет **`MACOS_PROFILE_APP_BASE64`** (профиль для `com.wplanwidget.app`).
-
-```bash
-base64 -i ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles/722b5882-bb79-4cf7-b67e-22fc5560f5e5.provisionprofile | pbcopy
-```
-→ секрет **`MACOS_PROFILE_WIDGET_BASE64`** (профиль для
-`com.wplanwidget.app.widget`).
-
-Если когда-нибудь пересоздашь эти профили в Xcode (новый Team, новый
-bundle ID и т.п.) — имена файлов изменятся, найди актуальные через:
-```bash
-for f in ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles/*; do
-  echo "$f:"; security cms -D -i "$f" | plutil -extract Name raw -o - -
-done
-```
-
-### 3. Добавление секретов на GitHub
+### 2. Добавление секретов на GitHub
 
 Через веб-интерфейс: **Settings → Secrets and variables → Actions → New
 repository secret** — вставить то, что скопировано в буфер, под нужным
@@ -84,8 +60,6 @@ repository secret** — вставить то, что скопировано в 
 ```bash
 gh secret set MACOS_CERT_P12_BASE64 < <(base64 -i ~/Desktop/wplan-cert.p12)
 gh secret set MACOS_CERT_PASSWORD -b "придумай-пароль-для-экспорта"
-gh secret set MACOS_PROFILE_APP_BASE64 < <(base64 -i ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles/e892d45f-082c-425a-a813-b29a02ed94ef.provisionprofile)
-gh secret set MACOS_PROFILE_WIDGET_BASE64 < <(base64 -i ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles/722b5882-bb79-4cf7-b67e-22fc5560f5e5.provisionprofile)
 ```
 
 `GITHUB_TOKEN` для создания релиза ничего настраивать не нужно — GitHub
@@ -113,7 +87,7 @@ xattr -cr /Applications/WplanWidgetApp.app
 — затем правый клик по иконке → «Открыть». Это стоит явно написать в
 описании релиза, пока нет платного Apple Developer Program.
 
-## Если сборка падает на этапе Archive/Export
+## Если сборка падает на этапе Archive
 
 Скорее всего дело в версии Xcode на раннере `macos-latest` — она может
 не совпадать с той, что стоит у тебя локально (SDK новее/старше). Проверить
@@ -123,11 +97,23 @@ xattr -cr /Applications/WplanWidgetApp.app
 если на раннере доступно несколько версий Xcode одновременно (обычно да,
 см. `ls /Applications | grep Xcode`).
 
+## Срок жизни сборки
+
+Провижининг-профиля в сборке нет, поэтому недельного срока бесплатного
+аккаунта тоже нет. Ограничение одно — сам сертификат «Apple Development»
+действует год. Проверить дату:
+```bash
+security find-certificate -a -c "Apple Development" -p | openssl x509 -noout -enddate
+```
+Когда срок подойдёт к концу — Xcode → Settings → Accounts → Manage
+Certificates выпустит новый, после чего пересобери приложение
+(`scripts/build_and_run.sh`) и обнови секрет `MACOS_CERT_P12_BASE64`.
+
 ## Когда появится платный аккаунт
 
 Замени сертификат «Apple Development» на «Developer ID Application» (те же
-секреты, переэкспортированные под новый сертификат), и добавь в workflow
-после экспорта два шага:
+секреты, переэкспортированные под новый сертификат, и `CODE_SIGN_IDENTITY`
+в `project.yml`), и добавь в workflow после сборки DMG два шага:
 ```bash
 xcrun notarytool submit "$RUNNER_TEMP/Wplan-${{ inputs.version }}.dmg" \
   --apple-id ... --team-id 8W787APH48 --password ... --wait

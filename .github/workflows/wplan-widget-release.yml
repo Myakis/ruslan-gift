@@ -4,7 +4,7 @@ name: Release
 # release from (the current implementation branch included). Creates a git
 # tag on that branch, builds a signed .app, packages it as a DMG, and
 # publishes both as a GitHub Release. See DEPLOY.md for the one-time setup
-# (signing certificate + provisioning profiles as repo secrets).
+# (signing certificate as repo secrets — no provisioning profiles needed).
 on:
   workflow_dispatch:
     inputs:
@@ -53,25 +53,6 @@ jobs:
 
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
 
-      # Xcode-managed profiles (the only kind a free "Personal Team" account
-      # can get — there's no developer portal access to create one manually
-      # without a paid Program membership) refuse to work under Manual
-      # signing at all (`IsXcodeManaged: true` baked into the profile
-      # itself). So this stays on the project's own Automatic signing style
-      # — verified locally that once a matching profile+certificate pair is
-      # already present, Automatic resolves them with no network/account
-      # access needed, which is exactly the CI environment here.
-      - name: Install provisioning profiles
-        env:
-          PROFILE_APP_BASE64: ${{ secrets.MACOS_PROFILE_APP_BASE64 }}
-          PROFILE_WIDGET_BASE64: ${{ secrets.MACOS_PROFILE_WIDGET_BASE64 }}
-        run: |
-          set -euo pipefail
-          PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
-          mkdir -p "$PROFILES_DIR"
-          echo "$PROFILE_APP_BASE64" | base64 --decode > "$PROFILES_DIR/ci-app.provisionprofile"
-          echo "$PROFILE_WIDGET_BASE64" | base64 --decode > "$PROFILES_DIR/ci-widget.provisionprofile"
-
       - name: Archive
         run: |
           xcodebuild \
@@ -81,17 +62,10 @@ jobs:
             -archivePath "$RUNNER_TEMP/Wplan.xcarchive" \
             archive
 
-      - name: Export app
-        run: |
-          xcodebuild -exportArchive \
-            -archivePath "$RUNNER_TEMP/Wplan.xcarchive" \
-            -exportPath "$RUNNER_TEMP/export" \
-            -exportOptionsPlist WplanWidgetApp/ExportOptions.ci.plist
-
       - name: Build DMG
         run: |
           ./scripts/build_dmg.sh \
-            "$RUNNER_TEMP/export/WplanWidgetApp.app" \
+            "$RUNNER_TEMP/Wplan.xcarchive/Products/Applications/WplanWidgetApp.app" \
             "$RUNNER_TEMP/Wplan-${{ inputs.version }}.dmg" \
             "Wplan"
 

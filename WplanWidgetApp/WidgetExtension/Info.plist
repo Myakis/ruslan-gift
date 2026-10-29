@@ -23,5 +23,7 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
+	<key>WplanAppGroup</key>
+	<string>$(DEVELOPMENT_TEAM).com.wplanwidget.app</string>
 </dict>
 </plist>

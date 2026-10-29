@@ -47,52 +47,35 @@ cd WplanCore
 swift test
 ```
 
-## Если хочешь собрать свою копию (свой Apple ID)
+## Собрать и запустить одной командой (в том числе под свой Apple ID)
 
-Bundle ID и App Group в проекте (`com.wplanwidget.app`,
-`group.com.wplanwidget.app`) уже зарегистрированы под одним конкретным Apple
-ID — Apple требует их глобальной уникальности **на все аккаунты сразу**,
-даже для бесплатных Personal Team. Значит, если просто открыть проект в
-своём Xcode и выбрать свою команду, будет ошибка вида:
+```bash
+scripts/build_and_run.sh
+```
 
-> Failed Registering Bundle Identifier — The app identifier
-> "com.wplanwidget.app" cannot be registered to your development team
-> because it is not available.
+Скрипт сам находит сертификат «Apple Development» в Keychain, берёт из него
+Team ID, генерирует проект (`xcodegen`, при необходимости ставит его через
+Homebrew), собирает Release, закрывает запущенную копию, ставит новую в
+`/Applications` и запускает. Если сертификатов несколько — спросит, какой
+взять; Team ID можно передать и явно: `scripts/build_and_run.sh ABCDE12345`.
 
-Чтобы собрать свою независимую копию — поменяй идентификаторы на
-уникальные (например, добавь своё имя) в трёх местах, прямо в Xcode
-(**Signing & Capabilities**):
+Файлы репозитория при этом не меняются: Team ID передаётся в сборку как
+`DEVELOPMENT_TEAM`, а App Group (`<TeamID>.com.wplanwidget.app`) выводится из
+него автоматически — и в entitlements, и в Info.plist, откуда её читает код.
+Подпись без провижининг-профилей, поэтому у Apple ничего регистрировать не
+нужно.
 
-1. **Team** — выбери свою (нужен залогиненный в Xcode свой Apple ID:
-   Xcode → Settings → Accounts).
-2. **Bundle Identifier** таргета `WplanWidgetApp` — например
-   `com.wplanwidget.app.<твоё-имя>`.
-3. **Bundle Identifier** таргета `WplanWidgetExtension` (виджет) — в тон
-   первому, например `com.wplanwidget.app.<твоё-имя>.widget`.
-4. **App Groups** (у **обоих** таргетов) — убери `group.com.wplanwidget.app`
-   и добавь новую, но **одинаковую** у обоих таргетов, например
-   `group.com.wplanwidget.app.<твоё-имя>`. Без этого меню-бар приложение и
-   виджет перестанут видеть общие данные друг друга.
-
-Как это выглядит в Xcode — таргет `WplanWidgetApp` (Team, Bundle Identifier,
-App Groups):
-
-![Signing & Capabilities для WplanWidgetApp](assets/1.png)
-
-И таргет `WplanWidgetExtension` (тот же Team, свой Bundle Identifier,
-**тот же** App Group):
-
-![Signing & Capabilities для WplanWidgetExtension](assets/2.png)
-
-После этого — **Try Again** на ошибке регистрации, дальше обычный Run.
-Эти изменения только для твоей локальной сборки, на оригинальный проект и
-чужие установки они не влияют.
+Если сертификата ещё нет: Xcode → Settings → Accounts → войти своим Apple ID →
+Manage Certificates → **+** → Apple Development.
 
 ## Ограничение без платного Apple Developer Program
 
 Сборки подписаны бесплатным сертификатом «Apple Development» — без
 нотаризации. Это значит, что на **другом** Mac запуск будет заблокирован
 Gatekeeper при первом открытии; обход и все детали — в [DEPLOY.md](DEPLOY.md#что-получит-скачавший-dmg).
+
+Недельного срока бесплатного аккаунта у сборок нет: провижининг-профиль не
+используется, а сертификат действует год (подробнее — [DEPLOY.md](DEPLOY.md#срок-жизни-сборки)).
 
 ## Релизы
 
