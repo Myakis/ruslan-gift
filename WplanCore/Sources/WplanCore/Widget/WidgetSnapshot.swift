@@ -39,6 +39,17 @@ public struct WidgetSnapshot: Codable, Equatable {
         self.updatedAt = updatedAt
     }
 
+    /// Equal apart from `updatedAt` — i.e. nothing the widget would draw differently.
+    public func hasSameContent(as other: WidgetSnapshot?) -> Bool {
+        guard let other else { return false }
+        return isStart == other.isStart
+            && vpnStatus == other.vpnStatus
+            && startedAt == other.startedAt
+            && scheduledFinishAt == other.scheduledFinishAt
+            && finishedAt == other.finishedAt
+            && isRestDay == other.isRestDay
+    }
+
     private enum CodingKeys: String, CodingKey {
         case isStart, vpnStatus, startedAt, scheduledFinishAt, finishedAt, isRestDay, updatedAt
     }

@@ -10,7 +10,7 @@ import WplanCore
 /// schedule) — the Wplan API itself exposes no real worked-hours value (see
 /// WplanCore's foundation plan's Known Limitation), so this is an estimate, not a
 /// server-verified duration.
-private let appGroupIdentifier = "group.com.wplanwidget.app"
+private let appGroupIdentifier = WplanAppGroup.identifier
 
 struct WplanRingProvider: TimelineProvider {
     func placeholder(in context: Context) -> WplanRingEntry {
@@ -21,15 +21,24 @@ struct WplanRingProvider: TimelineProvider {
         completion(currentEntry())
     }
 
+    /// While the day runs, hands WidgetKit a minute-by-minute timeline up front so
+    /// the ring moves without reloads — reloads are budgeted, and asking for one
+    /// every minute exhausts the budget, after which even the host app's reloads
+    /// (e.g. a schedule change) get ignored.
     func getTimeline(in context: Context, completion: @escaping (Timeline<WplanRingEntry>) -> Void) {
-        let entry = currentEntry()
-        // Refresh every minute while a day is running, so the elapsed/progress text
-        // keeps moving between the host app's own (much rarer) snapshot writes.
-        let nextRefresh = entry.snapshot?.startedAt != nil
-            ? Date().addingTimeInterval(60)
-            : Date().addingTimeInterval(15 * 60)
-        completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
+        let now = Date()
+        let snapshot = WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier)
+        guard snapshot?.isStart == false, snapshot?.startedAt != nil else {
+            completion(Timeline(entries: [WplanRingEntry(date: now, snapshot: snapshot)], policy: .after(now.addingTimeInterval(30 * 60))))
+            return
+        }
+        let entries = (0..<Self.runningTimelineMinutes).map { minute in
+            WplanRingEntry(date: now.addingTimeInterval(Double(minute) * 60), snapshot: snapshot)
+        }
+        completion(Timeline(entries: entries, policy: .atEnd))
     }
+
+    private static let runningTimelineMinutes = 120
 
     private func currentEntry() -> WplanRingEntry {
         WplanRingEntry(date: Date(), snapshot: WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier))
@@ -91,11 +100,10 @@ struct WplanRingWidgetView: View {
         return min(max(elapsed / total, 0), 1)
     }
 
-    /// Clock times — "08:14–16:14" — instead of a duration.
-    private var startEndText: String? {
-        guard let startedAt = entry.snapshot?.startedAt,
-              let finishAt = entry.snapshot?.scheduledFinishAt else { return nil }
-        return "\(Self.formatClock(startedAt))–\(Self.formatClock(finishAt))"
+    /// Time left until the scheduled finish while the day runs; clamps at 0:00.
+    private var remainingText: String? {
+        guard isRunning == true, let finishAt = entry.snapshot?.scheduledFinishAt else { return nil }
+        return Self.formatDuration(finishAt.timeIntervalSince(entry.date))
     }
 
     private var startClockText: String? {
@@ -223,10 +231,16 @@ struct WplanRingWidgetView: View {
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
                 .foregroundStyle(.secondary)
             ring(diameter: 74, lineWidth: 6) {
-                if let startEndText {
-                    Text(startEndText)
-                        .font(.system(size: 11, weight: .medium))
-                        .minimumScaleFactor(0.7)
+                if let remainingText {
+                    VStack(spacing: 0) {
+                        Text(remainingText)
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .monospacedDigit()
+                            .minimumScaleFactor(0.7)
+                        Text("осталось")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
+                    }
                 } else {
                     Image(systemName: iconName)
                         .foregroundStyle(vpnStatus == .connected ? .secondary : ringColor)

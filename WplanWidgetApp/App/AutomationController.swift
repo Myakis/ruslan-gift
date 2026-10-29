@@ -18,13 +18,23 @@ final class AutomationController: ObservableObject {
     private static let finishedAtKey = "todayFinishedAt"
     private static let widgetKind = "WplanRingWidget"
     private static let widgetRefreshInterval: TimeInterval = 5 * 60
+    private static let widgetForcedReloadInterval: TimeInterval = 30 * 60
     private static let lastHandledResetRequestKey = "lastHandledWidgetResetRequestAt"
     private static let resetRequestPollInterval: TimeInterval = 5
 
     @Published var configuration: ScheduleConfiguration {
         didSet {
             persistConfiguration()
-            Task { await agent.updateConfiguration(configuration) }
+            let configuration = configuration
+            configurationChangeTask?.cancel()
+            // Debounced: stepping a time field fires many changes in a row.
+            configurationChangeTask = Task { [weak self] in
+                guard let self else { return }
+                await self.agent.updateConfiguration(configuration)
+                try? await Task.sleep(nanoseconds: 600_000_000)
+                guard !Task.isCancelled else { return }
+                await self.refreshWidgetSnapshot()
+            }
         }
     }
     @Published var isRunning: Bool
@@ -42,6 +52,8 @@ final class AutomationController: ObservableObject {
     private let statusClient: ReauthenticatingWplanClient
     private let vpnChecker = VPNNetworkChecker()
     private var widgetRefreshTask: Task<Void, Never>?
+    private var configurationChangeTask: Task<Void, Never>?
+    private var lastWidgetReloadAt: Date?
     private var resetRequestPollTask: Task<Void, Never>?
 
     init(appGroupIdentifier: String, hashRefresher: PersistedQueryHashRefreshing?) {
@@ -170,19 +182,15 @@ final class AutomationController: ObservableObject {
         guard configuration.activeWeekdays.contains(Calendar.current.component(.weekday, from: now)) else {
             // Rest day per the schedule — skip the VPN/Wplan round trip entirely
             // and just tell the widget to show "Выходной".
-            WidgetSnapshotStore.save(
-                WidgetSnapshot(
-                    isStart: nil,
-                    vpnStatus: .disconnected,
-                    startedAt: nil,
-                    scheduledFinishAt: nil,
-                    finishedAt: nil,
-                    isRestDay: true,
-                    updatedAt: now
-                ),
-                appGroupIdentifier: appGroupIdentifier
-            )
-            WidgetCenter.shared.reloadTimelines(ofKind: Self.widgetKind)
+            publish(WidgetSnapshot(
+                isStart: nil,
+                vpnStatus: .disconnected,
+                startedAt: nil,
+                scheduledFinishAt: nil,
+                finishedAt: nil,
+                isRestDay: true,
+                updatedAt: now
+            ))
             return
         }
         let vpnStatus = await vpnChecker.currentStatus()
@@ -202,17 +210,25 @@ final class AutomationController: ObservableObject {
             defaults?.set(finishedAt, forKey: Self.finishedAtKey)
         }
         let scheduledFinishAt = await agent.currentScheduledFinishAt(now: now)
-        WidgetSnapshotStore.save(
-            WidgetSnapshot(
-                isStart: isStart,
-                vpnStatus: vpnStatus,
-                startedAt: startedAt,
-                scheduledFinishAt: scheduledFinishAt,
-                finishedAt: finishedAt,
-                updatedAt: now
-            ),
-            appGroupIdentifier: appGroupIdentifier
-        )
+        publish(WidgetSnapshot(
+            isStart: isStart,
+            vpnStatus: vpnStatus,
+            startedAt: startedAt,
+            scheduledFinishAt: scheduledFinishAt,
+            finishedAt: finishedAt,
+            updatedAt: now
+        ))
+    }
+
+    /// Widget reloads are budgeted by the system, so only ask for one when the
+    /// widget would actually draw something different (plus a periodic safety
+    /// reload, in case an earlier request was dropped).
+    private func publish(_ snapshot: WidgetSnapshot) {
+        let previous = WidgetSnapshotStore.load(appGroupIdentifier: appGroupIdentifier)
+        WidgetSnapshotStore.save(snapshot, appGroupIdentifier: appGroupIdentifier)
+        let reloadIsOverdue = lastWidgetReloadAt.map { snapshot.updatedAt.timeIntervalSince($0) >= Self.widgetForcedReloadInterval } ?? true
+        guard !snapshot.hasSameContent(as: previous) || reloadIsOverdue else { return }
+        lastWidgetReloadAt = snapshot.updatedAt
         WidgetCenter.shared.reloadTimelines(ofKind: Self.widgetKind)
     }
 
